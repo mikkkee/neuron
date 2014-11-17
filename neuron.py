@@ -1,5 +1,9 @@
 import math
 import random
+import copy
+from itertools import combinations
+
+import settings
 
 class Node():
 
@@ -18,7 +22,7 @@ class Node():
         Based on number of connections, i.e. type of pattern.
         '''
         neighbours = []
-        length = PATH.max_length
+        length = settings.MAX_PATH_LENGTH
         x, y = self.coor
 
         if self.connections == 2:
@@ -50,9 +54,13 @@ class Path():
     # Maximum length settings.
     max_length = 50
 
+    def __unicode__(self):
+        return "({n1[0], n1[1]}) -> ({n2[0], n2[1]})".format(
+            n1=self.origin, n2=self.dest)
+
     def __init__(self, origin, dest, length=0):
-        '''origin - the origin coordinates,
-        dest - the destination coordinates,
+        '''origin - the origin node,
+        dest - the destination node,
         length - the occupied length of this path.'''
         self.origin = origin
         self.dest = dest
@@ -68,31 +76,34 @@ class Path():
         # Grow by amount of distance.
         self.length += distance
 
-    @property
-    def direction(self):
-        return "({n1[0], n1[1]}) -> ({n2[0], n2[1]})".format(
-            n1=self.origin, n2=self.dest)
-
 
 class Neuron():
 
     # Neuron settings.
     # Grow speed.
-    speed = 5
+    speed = settings.GROW_SPEED
     # Split probability.
-    split_prob = 0.5
+    split_prob = settings.SPLIT_PROBABILITY
 
-    def __init__(self, origin, vertex):
+    def __init__(self, origin):
         '''Initialize a neuron instance.
-        origin - root node coordinates.
+        origin - root node.
         vertex - number of neighbour nodes.'''
 
-        # Turn coordinates into node object.
-        origin_node = Node(origin, vertex)
-        self.origin = origin_node
-        self.vertex = vertex
+        self.origin = origin
+        self.vertex = self.origin.connections
+
+        self.nodes = [self.origin]
+        self.boundary_nodes = []
+        self.paths = []
+        self.boundary_paths = []
+
         # Not connected immediately after creation.
         self.connected = False
+
+    def connect(self):
+        # Trun self.connected to True.
+        self.connected = True
 
     @property
     def hands(self):
@@ -106,22 +117,127 @@ class Neuron():
         elif self.vertex == 4:
             return 4
         elif self.vertex == 6:
+            # Choose randomly from {4, 5, 6}
             return random.randrange(4, 7, 1)
         else:
             return ErrorHandsNumber()
 
     def born(self):
         '''Grow hands to init self.nodes, self.boundary_nodes,
-        self.paths, and self.boundary_paths'''
+        self.paths, and self.boundary_paths.
+        Determine grow directions but do not grow now.'''
 
-        # Choose boundary nodes from neighbours.
+        # Choose boundary nodes from all neighbours.
         index = random.sample(range(self.vertex + 1), self.hands)
 
         for i in index:
+            # Update boundary_nodes and boundary_paths.
             coor = self.origin.neighbours[i]
             node = Node(self.coor, self.vertex)
             self.boundary_nodes.append(node)
+            path = Path(self.origin, node)
+            self.boundary_paths.append(path)
 
+    def grow(self):
+        '''Increase length for each path in boundary_paths.
+        Do not validate paths now. Validate in self.clean().'''
+        for path in self.boundary_paths:
+            path.length += self.speed
+
+    def split_check(self, node):
+        '''Check if need split when a path exceeds MAX_PATH_LENGTH.'''
+
+        # Split or not.
+        p = random.random()
+        split = True if p > 1/2 else False
+
+        # Possible ways.
+        possible_nodes = []
+        for neighbour in node.neighbours:
+            if neighbour not in self.nodes:
+                possible_nodes.append(self.nodes)
+
+        # Determin which way to go.
+        ways = []
+        possible_num = len(possible_nodes)
+        if possible_num == 0:
+            # No possible node, this path is dead.
+            return None
+        elif possible_num == 1:
+            # Only one possible node.
+            return possible_nodes
+        elif possible_num >= 2:
+            '''More than 1 possible nodes, return 2 nodes if split True, return
+            only 1 node if split False.'''
+            if split:
+                return random.sample(possible_nodes, 2)
+            else:
+                return random.sample(possible_nodes, 1)
+
+    def clean(self):
+        '''Validate boundary_paths and boundary_nodes.'''
+
+        # Boundary nodes and paths to delete.
+        nodes_to_del = []
+        paths_to_del = []
+
+        # Check for each path in boundary_paths.
+        for path in self.boundary_paths:
+            if path.length > settings.MAX_PATH_LENGTH:
+                '''
+                Append to to_del list. Use deep copy in case of path
+                changing
+                '''
+                path_copy = copy.deep_copy(path)
+                paths_to_del.append(path_copy)
+                nodes_to_del.append(path_copy.dest)
+                # New length.
+                new_length = path.length - settings.MAX_PATH_LENGTH
+                # Convert path.length to max_length to prepare for be appended.
+                path.length = settings.MAX_PATH_LENGTH
+                # Append path, node to self.paths, self.nodes
+                self.paths.append(path)
+                self.nodes.append(path.dest)
+
+                # Check new nodes.
+                new_nodes = self.split_check()
+                if not new_nodes:
+                    # No new path available.
+                    pass
+                else:
+                    # Each node in new_nodes is a new destination.
+                    for dest in new_nodes:
+                        # Append new destination node to self.boundary_nodes.
+                        self.boundary_nodes.append(dest)
+                        # Init new path from old destination to new destination.
+                        new_path = Path(path.dest, dest, new_length)
+                        # Append new path to boundary_paths.
+                        self.boundary_paths.append(new_path)
+
+        '''
+        Delete nodes and paths from nodes_to_del and paths_to_del from
+        self.nodes and self.paths.
+        '''
+        for node in nodes_to_del:
+            while node in self.boundary_nodes:
+                del self.boundary_nodes[self.boundary_nodes.index(node)]
+
+        for path in paths_to_del:
+            while path in self.boundary_paths:
+                del self.boundary_paths[self.boundary_paths.index(path)]
+
+    def check_alive(self):
+        '''Check paths in self.boundary_paths, if no possible next_node,
+        turn them to dead.'''
+        for path in self.boundary_paths:
+            node = path.origin
+            if all([x in self.nodes for x in node.neighbours]):
+                path.died()
+
+
+'''
+########## Exceptions ##########
+'''
 
 
 class ErrorConnectionNumber(Exception):
@@ -130,3 +246,78 @@ class ErrorConnectionNumber(Exception):
 
 class ErrorHandsNumber(Exception):
     pass
+
+
+
+'''
+########## Functions. ##########
+'''
+
+
+def coor_equal(c1, c2):
+    '''Check for equality bewteen two pair of float coordinates.'''
+    d = 0.0001
+    if all((c1[i] - c2[i]) < d for i in range(2)):
+        return True
+    else:
+        return False
+
+def check_connections(neurons, connected):
+    '''Check connections between neurons.
+    neurons - the list of neurons.
+    connected - a list of neurons that are already connected. Do not perform
+    check between a pair if both elements in the pair are in connected list.
+    '''
+    pairs = combinations(neurons, 2)
+
+    for pair in pairs:
+        # Do not perform check if both element in pair are in connected.
+        if any([x not in connected for x in pair]):
+
+            connected = False
+
+            '''
+            Start checking for connections.
+            1. If n1.nodes and n2.nodes have common elements, they are connected
+            2. If n1.boundary_nodes and n2.boundary_nodes have commen elements,
+               go to step 3.
+            3. If the sum of common paths' length is larger than MAX_LEN,
+               they are connected.
+            '''
+            while not connected:
+                for node in pair[0].nodes:
+                    # check for common nodes in internal nodes.
+                    if any(coor_equal(node.coor, x.coor) for x in pair[1].nodes):
+                        pair[0].connect()
+                        pair[1].connect()
+                        connected = True
+                        break
+
+            # Continue check if previous check didnt turn connected to True.
+            while not connected:
+                for p1 in pair[0].boundary_paths:
+                    for p2 in pair[1].boundary_paths:
+                        '''
+                        If not connected, then no nodes are commen in n1.nodes
+                        and n2.nodes. Then p1.origin must be different from
+                        p2.orgin.
+                        '''
+                        if (
+                            coor_equal(p1.dest, p2.origin) and \
+                            coor_equal(p2.dest, p1.origin)
+                            ):
+                            if p1.length + p2.length >= settings.MAX_PATH_LENGTH:
+                                pair[0].connect()
+                                pair[1].connect()
+                                connected = True
+                                break
+
+def stats_connected(neurons):
+    '''Stats connected neurons.
+    Return percentage of connected neurons to all neurons.'''
+    count = 0
+    for neuron in neurons:
+        if neuron.connected:
+            count += 1
+
+    return float(count)/len(neurons)
