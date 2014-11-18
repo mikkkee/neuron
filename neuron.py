@@ -310,7 +310,7 @@ def check_connections(neurons, connected):
     for pair in pairs:
         # Do not perform check if both element in pair are in connected.
         if any([x not in connected for x in pair]):
-            connected = False
+            connectFlag = False
             '''
             Start checking for connections.
             1. If n1.nodes and n2.nodes have common elements, they are connected
@@ -325,11 +325,11 @@ def check_connections(neurons, connected):
                 if any([coor_equal(node.coor, x.coor) for x in pair[1].nodes]):
                     pair[0].connect()
                     pair[1].connect()
-                    connected = True
+                    connectFlag = True
                     break
 
             # Continue check if previous check didnt turn connected to True.
-            if not connected:
+            if not connectFlag:
                 for p1 in pair[0].boundary_paths:
                     for p2 in pair[1].boundary_paths:
                         '''
