@@ -16,6 +16,22 @@ class Node():
         self.coor = tuple([float(x) for x in coordinates])
         self.connections = int(connections)
 
+    def __eq__(self, other):
+        '''Operatir overloading - comparison equal
+        Need to rewrite for 3 connections.'''
+        if isinstance(other, Node):
+            return other.__hash__() == self.__hash__()
+
+    def __hash__(self):
+        '''Operator overloading - hash method
+        Used for set and comparison.'''
+        return (hash(self.coor) ^ hash(self.connections))
+
+    def __repr__(self):
+        return "Node: at ({c[0]}, {c[1]}) with {n} connections".format(
+        c=self.coor, n=self.connections
+        )
+
     @property
     def neighbours(self):
         '''Return coordinates of neighbours.
@@ -46,17 +62,30 @@ class Node():
             neighbours.append((x + 0.5*length, y + d*length))
         else:
             raise ErrorConnectionNumber()
-        return neighbours
+
+        # Convert neighbour coordinates to neighbour nodes.
+        neighbour_nodes = []
+        for coor in neighbours:
+            node = Node(coor, self.connections)
+            neighbour_nodes.append(node)
+        return neighbour_nodes
 
 
 class Path():
 
     # Maximum length settings.
-    max_length = 50
+    max_length = settings.MAX_PATH_LENGTH
 
-    def __unicode__(self):
-        return "({n1[0], n1[1]}) -> ({n2[0], n2[1]})".format(
-            n1=self.origin, n2=self.dest)
+    def __repr__(self):
+        return "({n1[0]}, {n1[1]}) -> ({n2[0]}, {n2[1]}), {length}".format(
+            n1=self.origin.coor, n2=self.dest.coor, length=self.length)
+
+    def __eq__(self, other):
+        if isinstance(other, Path):
+            return self.__hash__() == other.__hash__()
+
+    def __hash__(self):
+        return (hash(self.origin) ^ hash(self.dest) ^ hash(self.length))
 
     def __init__(self, origin, dest, length=0):
         '''origin - the origin node,
@@ -91,7 +120,6 @@ class Neuron():
         vertex - number of neighbour nodes.'''
 
         self.origin = origin
-        self.vertex = self.origin.connections
 
         self.nodes = [self.origin]
         self.boundary_nodes = []
@@ -104,6 +132,10 @@ class Neuron():
     def connect(self):
         # Trun self.connected to True.
         self.connected = True
+
+    @property
+    def vertex(self):
+        return self.origin.connections
 
     @property
     def hands(self):
@@ -128,34 +160,42 @@ class Neuron():
         Determine grow directions but do not grow now.'''
 
         # Choose boundary nodes from all neighbours.
-        index = random.sample(range(self.vertex + 1), self.hands)
+        index = random.sample(range(self.vertex), self.hands)
+        # Sort index for easier test.
+        index.sort()
 
         for i in index:
             # Update boundary_nodes and boundary_paths.
-            coor = self.origin.neighbours[i]
-            node = Node(self.coor, self.vertex)
+            node = self.origin.neighbours[i]
             self.boundary_nodes.append(node)
             path = Path(self.origin, node)
             self.boundary_paths.append(path)
 
     def grow(self):
-        '''Increase length for each path in boundary_paths.
+        '''Increase length for each alive path in boundary_paths.
         Do not validate paths now. Validate in self.clean().'''
         for path in self.boundary_paths:
-            path.length += self.speed
+            if path.alive:
+                path.length += self.speed
 
-    def split_check(self, node):
+    def split_check(self):
         '''Check if need split when a path exceeds MAX_PATH_LENGTH.'''
 
         # Split or not.
         p = random.random()
         split = True if p > 1/2 else False
 
+        return split
+
+    def way_to_go(self, node, split):
+        '''Choose a way to go.
+        Use split_check() to determine whether split or not.'''
+
         # Possible ways.
         possible_nodes = []
         for neighbour in node.neighbours:
-            if neighbour not in self.nodes:
-                possible_nodes.append(self.nodes)
+            if neighbour not in (self.nodes + self.boundary_nodes):
+                possible_nodes.append(neighbour)
 
         # Determin which way to go.
         ways = []
@@ -188,7 +228,7 @@ class Neuron():
                 Append to to_del list. Use deep copy in case of path
                 changing
                 '''
-                path_copy = copy.deep_copy(path)
+                path_copy = copy.deepcopy(path)
                 paths_to_del.append(path_copy)
                 nodes_to_del.append(path_copy.dest)
                 # New length.
@@ -200,7 +240,7 @@ class Neuron():
                 self.nodes.append(path.dest)
 
                 # Check new nodes.
-                new_nodes = self.split_check()
+                new_nodes = self.way_to_go(path.dest, self.split_check())
                 if not new_nodes:
                     # No new path available.
                     pass
@@ -257,10 +297,7 @@ class ErrorHandsNumber(Exception):
 def coor_equal(c1, c2):
     '''Check for equality bewteen two pair of float coordinates.'''
     d = 0.0001
-    if all((c1[i] - c2[i]) < d for i in range(2)):
-        return True
-    else:
-        return False
+    return all([abs(c1[i] - c2[i]) < d for i in range(2)])
 
 def check_connections(neurons, connected):
     '''Check connections between neurons.
@@ -284,35 +321,37 @@ def check_connections(neurons, connected):
             3. If the sum of common paths' length is larger than MAX_LEN,
                they are connected.
             '''
-            while not connected:
-                for node in pair[0].nodes:
-                    # check for common nodes in internal nodes.
-                    if any(coor_equal(node.coor, x.coor) for x in pair[1].nodes):
-                        pair[0].connect()
-                        pair[1].connect()
-                        connected = True
-                        break
+
+            for node in pair[0].nodes:
+                # check for common nodes in internal nodes.
+                if any([coor_equal(node.coor, x.coor) for x in pair[1].nodes]):
+                    pair[0].connect()
+                    pair[1].connect()
+                    connected = True
+                    print("True in nodes")
+                    break
 
             # Continue check if previous check didnt turn connected to True.
-            while not connected:
-                for p1 in pair[0].boundary_paths:
-                    for p2 in pair[1].boundary_paths:
-                        '''
-                        If not connected, then no nodes are commen in n1.nodes
-                        and n2.nodes. Then p1.origin must be different from
-                        p2.orgin.
-                        '''
-                        if (
-                            coor_equal(p1.dest, p2.origin) and \
-                            coor_equal(p2.dest, p1.origin)
-                            ):
-                            if p1.length + p2.length >= settings.MAX_PATH_LENGTH:
-                                pair[0].connect()
-                                pair[1].connect()
-                                connected = True
-                                break
 
-def stats_connected(neurons):
+            for p1 in pair[0].boundary_paths:
+                for p2 in pair[1].boundary_paths:
+                    '''
+                    If not connected, then no nodes are commen in n1.nodes
+                    and n2.nodes. Then p1.origin must be different from
+                    p2.orgin.
+                    '''
+                    if (
+                        coor_equal(p1.dest.coor, p2.origin.coor) and \
+                        coor_equal(p2.dest.coor, p1.origin.coor)
+                        ):
+                        if p1.length + p2.length >= settings.MAX_PATH_LENGTH:
+                            pair[0].connect()
+                            pair[1].connect()
+                            connected = True
+                            print("True in paths")
+                            break
+
+def stats_connections(neurons):
     '''Stats connected neurons.
     Return percentage of connected neurons to all neurons.'''
     count = 0

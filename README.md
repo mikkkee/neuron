@@ -80,6 +80,14 @@ Methods
      `path2.length`. If the sum exceeds maximum path length, mark `n1` and `n2`
      as connected, else stop checking.
 
+## `stats_connections()`
+
+Count the percentage of connected neurons.
+
+## `coor_equal()`
+
+Check equality for two pairs of float coordinates.
+
 
 # Process
 1. Initiate grid and neurons.
