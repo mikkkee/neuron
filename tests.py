@@ -254,3 +254,18 @@ class TestCheckConnections(TestCase):
         check_connections([self.n0, self.n2], [])
         self.assertFalse(self.n0.connected)
         self.assertFalse(self.n2.connected)
+
+
+class TestEqualCoor(TestCase):
+
+    def setUp(self):
+        self.c1 = (0, 0)
+        self.c2 = (0, 0)
+        self.c3 = (0, 1)
+        self.c4 = (1, 0)
+
+    def test_coor_equal(self):
+        self.assertTrue(coor_equal(self.c1, self.c2))
+        self.assertFalse(coor_equal(self.c1, self.c3))
+        self.assertFalse(coor_equal(self.c1, self.c4))
+        self.assertFalse(coor_equal(self.c3, self.c4))
