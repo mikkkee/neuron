@@ -310,9 +310,7 @@ def check_connections(neurons, connected):
     for pair in pairs:
         # Do not perform check if both element in pair are in connected.
         if any([x not in connected for x in pair]):
-
             connected = False
-
             '''
             Start checking for connections.
             1. If n1.nodes and n2.nodes have common elements, they are connected
@@ -328,28 +326,25 @@ def check_connections(neurons, connected):
                     pair[0].connect()
                     pair[1].connect()
                     connected = True
-                    print("True in nodes")
                     break
 
             # Continue check if previous check didnt turn connected to True.
-
-            for p1 in pair[0].boundary_paths:
-                for p2 in pair[1].boundary_paths:
-                    '''
-                    If not connected, then no nodes are commen in n1.nodes
-                    and n2.nodes. Then p1.origin must be different from
-                    p2.orgin.
-                    '''
-                    if (
-                        coor_equal(p1.dest.coor, p2.origin.coor) and \
-                        coor_equal(p2.dest.coor, p1.origin.coor)
-                        ):
-                        if p1.length + p2.length >= settings.MAX_PATH_LENGTH:
-                            pair[0].connect()
-                            pair[1].connect()
-                            connected = True
-                            print("True in paths")
-                            break
+            if not connected:
+                for p1 in pair[0].boundary_paths:
+                    for p2 in pair[1].boundary_paths:
+                        '''
+                        If not connected, then no nodes are commen in n1.nodes
+                        and n2.nodes. Then p1.origin must be different from
+                        p2.orgin.
+                        '''
+                        if (
+                            coor_equal(p1.dest.coor, p2.origin.coor) and \
+                            coor_equal(p2.dest.coor, p1.origin.coor)
+                            ):
+                            if p1.length + p2.length >= settings.MAX_PATH_LENGTH:
+                                pair[0].connect()
+                                pair[1].connect()
+                                break
 
 def stats_connections(neurons):
     '''Stats connected neurons.
