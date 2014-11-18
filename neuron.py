@@ -274,6 +274,35 @@ class Neuron():
             if all([x in self.nodes for x in node.neighbours]):
                 path.died()
 
+    def cal_end(self, path):
+        p1 = path.origin.coor
+        p2 = path.dest.coor
+        l = float(path.length)
+        m = settings.MAX_PATH_LENGTH
+        # Calculate x and y
+        x = l/m * p2[0] + (m - l)/m * p1[0]
+        y = l/m * p2[1] + (m - l)/m * p1[1]
+
+        return (x,y)
+
+    def draw(self, draw, color):
+        '''Draw neuron nodes and paths on draw object.'''
+
+        # Draw nodes.
+        for node in self.nodes:
+            coor = node.coor
+            draw.ellipse([(coor[0] - 5, coor[1] - 5), (coor[0] + 10, coor[1] + 10)], fill=color)
+        # Draw full paths.
+        for path in self.paths:
+            line = [path.origin.coor, path.dest.coor]
+            draw.line(line, fill=color, width=3)
+
+        # Draw partial paths.
+        for path in self.boundary_paths:
+            line = [path.origin.coor, self.cal_end(path)]
+            draw.line(line, fill=color, width=3)
+
+
 
 '''
 ########## Exceptions ##########
