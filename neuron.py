@@ -288,10 +288,10 @@ class Neuron():
     def draw(self, draw, color):
         '''Draw neuron nodes and paths on draw object.'''
 
-        # Draw nodes.
-        for node in self.nodes:
-            coor = node.coor
-            draw.ellipse([(coor[0] - 5, coor[1] - 5), (coor[0] + 10, coor[1] + 10)], fill=color)
+        # Draw origin node only.
+        node = self.origin
+        coor = node.coor
+        draw.ellipse([(coor[0] - 5, coor[1] - 5), (coor[0] + 10, coor[1] + 10)], fill=color)
         # Draw full paths.
         for path in self.paths:
             line = [path.origin.coor, path.dest.coor]
