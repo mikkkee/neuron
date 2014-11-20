@@ -382,5 +382,66 @@ def stats_connections(neurons):
     for neuron in neurons:
         if neuron.connected:
             count += 1
-
     return float(count)/len(neurons)
+
+
+def pattern42(N, nx, ny, p=0.3):
+    '''Pattern 2 or pattern 4.
+    N - number of edges
+    nx - grid number along x
+    ny - grid number along y
+    p - number of neurons to all grids.'''
+
+    grid = []
+    lattice = settings.MAX_PATH_LENGTH
+
+    n_neurons = int(nx*ny*p)
+
+    for x in range(500, 500 + nx*lattice, lattice):
+        for y in range(500, 500 + ny*lattice, lattice):
+            grid.append((x,y))
+
+    node_coors = random.sample(grid, n_neurons)
+
+    neurons = [Neuron(Node(x, N)) for x in node_coors]
+
+    return neurons
+
+
+def pattern6(nx, ny, p=0.3):
+    '''Pattern 6.'''
+
+    ny1 = ny / 2
+    ny2 = ny - ny1
+
+    grid = []
+    lattice = settings.MAX_PATH_LENGTH
+    h = math.sqrt(3)
+
+    n_neurons = int(nx*ny*p)
+
+    for i in range(10, 10 + ny1):
+        y = h*i
+        for j in range(10, 10 + nx):
+            x = j - 0.5
+            grid.append((x*lattice, y*lattice))
+
+    for i in range(10, 10 + ny2):
+        y = h / 2 + i * h
+        for j in range(10, 10 + nx):
+            x = j
+            grid.append((x*lattice, y*lattice))
+
+    # Draw pattern
+    img = Image.new('RGBA', (2000, 2000), 'white')
+    draw = ImageDraw.Draw(img)
+    points = [[(x[0], x[1]), (x[0]+5, x[1]+5)] for x in grid]
+    for point in points:
+        draw.ellipse(point, fill='black')
+    img.save('pattern6.png', 'PNG')
+
+    node_coors = random.sample(grid, n_neurons)
+
+    neurons = [Neuron(Node(x, 6)) for x in node_coors]
+
+    return neurons
