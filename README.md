@@ -7,6 +7,9 @@
 - `connections:` number of neighbours.
 - `neighbours`: neighbour nodes of current node. Different calculation methods
   for different number of connections.
+- `__hash__()`: operator overloading, used for comparison and in `set`.
+- `__eq__()`: operator overloading, used for comparison.
+- `__repr__()`: operator overloading, representation.
 
 ## `Path`
 - `origin`: one of the nodes it is connecting. Origin node.
@@ -15,6 +18,10 @@
 - `direction`: `origin` -> `dest`.
 - `alive`: If `True`, the path can grow at next step, else cannot grow.
 - `died()`: Turn a path to dead state by setting `self.alive` to False.
+- `grow()`: increase `self.length`.
+- `__hash__()`: operator overloading, used for comparison and in `set`.
+- `__eq__()`: operator overloading, used for comparison.
+- `__repr__()`: operator overloading, representation.
 
 ## `Neuron`
 
@@ -57,6 +64,8 @@ Methods
   nodes for `way_to_go()` to choose.
 - `way_to_go()`: Decide which way to go when encountering a new node. Just
   choose from possible destination nodes `split_check()` passes.
+- `cal_end(self, path)`: calculate coordinates of a endpoint for a path.
+- `draw()`: Draw origin node and current paths on a `Draw` object.
 
 # Functions
 
@@ -87,6 +96,18 @@ Count the percentage of connected neurons.
 ## `coor_equal()`
 
 Check equality for two pairs of float coordinates.
+
+## Patterns
+
+### `pattern42()`
+
+Generate pattern grid for type 2 and type 4. Then randomly select nodes as
+neuron origin nodes.
+
+### `pattern6()`
+
+Generate pattern grid for type 6. Then randomly select nodes as neuron origin
+nodes.
 
 
 # Process

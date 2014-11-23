@@ -275,6 +275,7 @@ class Neuron():
                 path.died()
 
     def cal_end(self, path):
+        '''Calculate coordinates for endpoint for a path.'''
         p1 = path.origin.coor
         p2 = path.dest.coor
         l = float(path.length)
