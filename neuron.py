@@ -3,6 +3,8 @@ import random
 import copy
 from itertools import combinations
 
+import numpy as np
+
 import settings
 
 class Node():
@@ -187,15 +189,24 @@ class Neuron():
 
         return split
 
-    def way_to_go(self, node, split):
-        '''Choose a way to go.
-        Use split_check() to determine whether split or not.'''
-
-        # Possible ways.
-        possible_nodes = []
+    def avail_neighbours(self, node):
+        '''Available neighbours of a node. Available means that this neighbour
+        is not currently occupied by this neuron.'''
+        avail = []
         for neighbour in node.neighbours:
             if neighbour not in (self.nodes + self.boundary_nodes):
-                possible_nodes.append(neighbour)
+                avail.append(neighbour)
+        return avail
+
+    def way_to_go(self, node, split, local=False, origin=None):
+        '''Choose a way to go.
+        Use split_check() to determine whether split or not.
+        If local=True, consider local structure effects when determine which
+        way to go. When local is True, origin is required as the origin node of
+        the previous path.'''
+
+        # Possible nodes to head to.
+        possible_nodes = self.avail_neighbours(node)
 
         # Determin which way to go.
         ways = []
@@ -209,10 +220,56 @@ class Neuron():
         elif possible_num >= 2:
             '''More than 1 possible nodes, return 2 nodes if split True, return
             only 1 node if split False.'''
-            if split:
-                return random.sample(possible_nodes, 2)
+            if local:
+                '''Use local structure to decide which way to go instead of
+                random.sample'''
+                if split:
+                    return self.local_sample(possible_nodes, node, origin, 2)
+                else:
+                    return self.local_sample(possible_nodes, node, orgin, 1)
             else:
-                return random.sample(possible_nodes, 1)
+                if split:
+                    return random.sample(possible_nodes, 2)
+                else:
+                    return random.sample(possible_nodes, 1)
+
+    def local_sample(nodes, node, origin, n):
+        '''Choose n elements from nodes according to their local structure with
+        origin and node.'''
+        prob = []
+        d1 = np.array(node.coor) - np.array(origin.coor)
+        for neighbour in nodes:
+            d = np.array(neigbhour.coor) - np.array(node)
+            if np.dot(d1, d) < 0:
+                # Case 1: go back.
+                prob.append((neighbour, settings.P1))
+            elif abs(np.dot(d1, d1) - settings.MAX_PATH_LENGTH ** 2) < 0.01:
+                # Case 2: go directly.
+                prob.append((neighbour, settings.P1))
+            else:
+                # Case 3: turn left or right 60 degrees.
+                prob.append((neighbour, settings.P1))
+
+        real_way = []
+        if n <= len(nodes):
+            while len(real_way) < n:
+                # Random number between 0 and sum of a probs.
+                a = random.random() * sum([x[1] for x in prob])
+                c = 0
+                for item in prob:
+                    c = c + item[1]
+                    if a < c:
+                        real_way.append(item[0])
+                        break
+        return real_way
+
+
+    def local_way_to_go(self, origin, dest, split):
+        '''Choose possible nodes from neighbour nodes, considering effects
+        of previous node (local structure).'''
+        # Filter possible nodes which are not currently occupied by the neuron.
+        possible_nodes = self.avail_neighbours(dest)
+        pass
 
     def clean(self):
         '''Validate boundary_paths and boundary_nodes.'''
