@@ -67,7 +67,7 @@ def main(argv):
             # Grow and clean for each neuron.
             for item in neurons:
                 item.grow()
-                item.clean()
+                item.clean(local=True)
 
             # Record connected neurons.
             connected = [x for x in neurons if x.connected]

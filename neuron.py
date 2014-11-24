@@ -263,16 +263,9 @@ class Neuron():
                         break
         return real_way
 
-
-    def local_way_to_go(self, origin, dest, split):
-        '''Choose possible nodes from neighbour nodes, considering effects
-        of previous node (local structure).'''
-        # Filter possible nodes which are not currently occupied by the neuron.
-        possible_nodes = self.avail_neighbours(dest)
-        pass
-
-    def clean(self):
-        '''Validate boundary_paths and boundary_nodes.'''
+    def clean(self, local=True):
+        '''Validate boundary_paths and boundary_nodes.
+        local=True for cases that path.length is more than twice of max_length.'''
 
         # Boundary nodes and paths to delete.
         nodes_to_del = []
@@ -297,7 +290,11 @@ class Neuron():
                 self.nodes.append(path.dest)
 
                 # Check new nodes.
-                new_nodes = self.way_to_go(path.dest, self.split_check())
+                if local:
+                    new_nodes = self.way_to_go(path.dest, self.split_check(),local=True, origin=path.origin)
+                else:
+                    new_nodes = self.way_to_go(path.dest, self.split_check())
+
                 if not new_nodes:
                     # No new path available.
                     pass
@@ -312,7 +309,7 @@ class Neuron():
                         self.boundary_paths.append(new_path)
 
         '''
-        Delete nodes and paths from nodes_to_del and paths_to_del from
+        Delete nodes and paths in nodes_to_del and paths_to_del from
         self.nodes and self.paths.
         '''
         for node in nodes_to_del:
@@ -322,6 +319,13 @@ class Neuron():
         for path in paths_to_del:
             while path in self.boundary_paths:
                 del self.boundary_paths[self.boundary_paths.index(path)]
+
+        # Continue check until all boundary paths have reasonable length.
+        if not all([x.length <= settings.MAX_PATH_LENGTH for x in self.boundary_paths]):
+            if local:
+                self.clean(local=True)
+            else:
+                self.clean()
 
     def check_alive(self):
         '''Check paths in self.boundary_paths, if no possible next_node,
