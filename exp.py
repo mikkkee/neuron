@@ -32,26 +32,34 @@ def main(argv):
     draw_flag = args.draw
 
     # Number of different runs.
-    N_run = 100
+    N_run = settings.N_run
     # Number of timesteps
-    T = 10
+    T = settings.T
 
     # Data file
     out_file_name = 't_percentage_{n}_speed_25.dat'.format(n=N)
 
-    nx = 18
-    ny = 14
+    nx = settings.Nx
+    ny = settings.Ny
 
     data = {}
     for r in range(N_run):
         # Set up neurons.
+        print("Generating patterns...")
+
         if N != 6:
-            neurons = pattern42(N, nx, ny)
+            neurons = pattern42(N, nx, ny, p=settings.pn)
         else:
-            neurons = pattern6(nx, ny)
+            neurons = pattern6(nx, ny, p=settings.pn)
+
+        print("Patterns generated.")
+
+        print("Initiating neurons...")
 
         for item in neurons:
             item.born()
+
+        print("Neurons initiated.")
 
         # Reset timestep and percentage.
         t = 0
@@ -65,8 +73,10 @@ def main(argv):
         # Run for T steps.
         while t<=T:
             # Grow and clean for each neuron.
-            for item in neurons:
+            for i,item in enumerate(neurons):
+                print("Growing {i}th neuron...".format(i=i))
                 item.grow()
+                print("Cleaning {i}th neuron...".format(i=i))
                 item.clean(local=True)
 
             # Record connected neurons.
@@ -75,7 +85,7 @@ def main(argv):
             # Reset image.
             if draw_flag:
                 img_name = "trj_{nn}_{rr}_{tt}.png".format(nn=N, rr=r, tt=t)
-                img = Image.new('RGBA', (2000, 2000), 'white')
+                img = Image.new('RGBA', (settings.Lx, settings.Ly), 'white')
                 draw = ImageDraw.Draw(img)
 
                 # Draw
@@ -84,6 +94,7 @@ def main(argv):
                 img.save(img_name, 'PNG')
 
             # Check connections
+            print("Checking connections...")
             check_connections(neurons, connected)
 
             # Percentage for previous step.

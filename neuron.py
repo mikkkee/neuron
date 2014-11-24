@@ -3,6 +3,7 @@ import random
 import copy
 from itertools import combinations
 
+from PIL import Image, ImageDraw
 import numpy as np
 
 import settings
@@ -152,7 +153,7 @@ class Neuron():
             return 4
         elif self.vertex == 6:
             # Choose randomly from {4, 5, 6}
-            return random.randrange(4, 7, 1)
+            return random.randrange(settings.Hands_low, settings.Hands_high + 1, 1)
         else:
             return ErrorHandsNumber()
 
@@ -185,7 +186,7 @@ class Neuron():
 
         # Split or not.
         p = random.random()
-        split = True if p > 1/2 else False
+        split = True if p < settings.SPLIT_PROBABILITY else False
 
         return split
 
@@ -226,20 +227,20 @@ class Neuron():
                 if split:
                     return self.local_sample(possible_nodes, node, origin, 2)
                 else:
-                    return self.local_sample(possible_nodes, node, orgin, 1)
+                    return self.local_sample(possible_nodes, node, origin, 1)
             else:
                 if split:
                     return random.sample(possible_nodes, 2)
                 else:
                     return random.sample(possible_nodes, 1)
 
-    def local_sample(nodes, node, origin, n):
+    def local_sample(self, nodes, node, origin, n):
         '''Choose n elements from nodes according to their local structure with
         origin and node.'''
         prob = []
         d1 = np.array(node.coor) - np.array(origin.coor)
         for neighbour in nodes:
-            d = np.array(neigbhour.coor) - np.array(node)
+            d = np.array(neighbour.coor) - np.array(node.coor)
             if np.dot(d1, d) < 0:
                 # Case 1: go back.
                 prob.append((neighbour, settings.P1))
@@ -357,12 +358,12 @@ class Neuron():
         # Draw full paths.
         for path in self.paths:
             line = [path.origin.coor, path.dest.coor]
-            draw.line(line, fill=color, width=3)
+            draw.line(line, fill=color, width=1)
 
         # Draw partial paths.
         for path in self.boundary_paths:
             line = [path.origin.coor, self.cal_end(path)]
-            draw.line(line, fill=color, width=3)
+            draw.line(line, fill=color, width=1)
 
 
 
@@ -398,7 +399,8 @@ def check_connections(neurons, connected):
     '''
     pairs = combinations(neurons, 2)
 
-    for pair in pairs:
+    for i,pair in enumerate(pairs):
+        # print("Checking connections between {i}th pair".format(i=i))
         # Do not perform check if both element in pair are in connected.
         if any([x not in connected for x in pair]):
             connectFlag = False

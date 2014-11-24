@@ -185,7 +185,7 @@ class TestNeuron(TestCase):
 
         self.neuron.born()
         # Grow to exceed max_length.
-        steps = int(self.max_length)/int(Neuron.speed) + 1
+        steps = int(self.max_length)/5 + 1
         self.assertEqual(steps, 11)
         for i in range(steps):
             self.neuron.grow()
