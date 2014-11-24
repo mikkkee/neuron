@@ -15,7 +15,6 @@
 - `origin`: one of the nodes it is connecting. Origin node.
 - `dest`: the other node it is connecting. Destination node.
 - `length`: length of path.
-- `direction`: `origin` -> `dest`.
 - `alive`: If `True`, the path can grow at next step, else cannot grow.
 - `died()`: Turn a path to dead state by setting `self.alive` to False.
 - `grow()`: increase `self.length`.
