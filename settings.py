@@ -6,7 +6,7 @@
 N_run = 100
 
 # Number of timesteps to run.
-T = 5
+T = 8
 
 # Neuron percentage. Ratio of neuron number to the number of total grid points.
 pn = 0.003

@@ -110,13 +110,16 @@ def main(argv):
             # Increase timestep
             t += 1
 
-    # Write data
-    with open(out_file_name, 'w') as data_file:
-        time_series = sorted(data.keys())
-        for t in time_series:
-            data_file.write('\n{tt} '.format(tt=t))
-            for p in data[t]:
-                data_file.write('{pp:.3f} '.format(pp=p))
+        # Write data
+        # Update data file after each run.
+        with open(out_file_name, 'w') as data_file:
+            time_series = sorted(data.keys())
+            for t in time_series:
+                data_file.write('\n{tt} '.format(tt=t))
+                for p in data[t]:
+                    data_file.write('{pp:.3f} '.format(pp=p))
+
+
 
 if __name__ == '__main__':
     main(sys.argv)
