@@ -214,9 +214,9 @@ class TestCheckConnections(TestCase):
         node0 = Node(c0, 4)
         node1 = Node(c1, 4)
 
-        path0 = Path(node0, node1, 30)
-        path1 = Path(node1, node0, 30)
-        path2 = Path(node1, node0, 10)
+        path0 = Path(node0, node1, 3)
+        path1 = Path(node1, node0, 48)
+        path2 = Path(node1, node0, 1)
 
         self.n0 = Neuron(node0)
         self.n1 = Neuron(node1)
