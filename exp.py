@@ -64,6 +64,7 @@ def main(argv):
         # Reset timestep and percentage.
         t = 0
         percentage = 0
+        connected = []
 
         # Assign color
         if draw_flag:
@@ -77,7 +78,7 @@ def main(argv):
                 print("Growing {i}th neuron...".format(i=i))
                 item.grow()
                 print("Cleaning {i}th neuron...".format(i=i))
-                item.clean(local=True)
+                item.clean(local=settings.Local)
 
             # Record connected neurons.
             connected = [x for x in neurons if x.connected]
@@ -98,7 +99,7 @@ def main(argv):
             check_connections(neurons, connected)
 
             # Percentage for previous step.
-            print r, t+1, percentage
+            print r, t, percentage
             if t not in data.keys():
                 data[t] = [percentage]
             else:
