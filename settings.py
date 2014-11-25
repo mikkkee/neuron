@@ -3,10 +3,10 @@
 ######## Experimental settings ########
 
 # Number of different runs.
-N_run = 1
+N_run = 100
 
 # Number of timesteps to run.
-T = 10
+T = 5
 
 # Neuron percentage. Ratio of neuron number to the number of total grid points.
 pn = 0.003
