@@ -225,6 +225,7 @@ class Neuron():
                 '''Use local structure to decide which way to go instead of
                 random.sample'''
                 if split:
+                    print("Spliting")
                     return self.local_sample(possible_nodes, node, origin, 2)
                 else:
                     return self.local_sample(possible_nodes, node, origin, 1)
@@ -292,7 +293,7 @@ class Neuron():
 
                 # Check new nodes.
                 if local:
-                    new_nodes = self.way_to_go(path.dest, self.split_check(),local=True, origin=path.origin)
+                    new_nodes = self.way_to_go(path.dest, self.split_check(), local=True, origin=path.origin)
                 else:
                     new_nodes = self.way_to_go(path.dest, self.split_check())
 
@@ -322,7 +323,7 @@ class Neuron():
                 del self.boundary_paths[self.boundary_paths.index(path)]
 
         # Continue check until all boundary paths have reasonable length.
-        if not all([x.length <= settings.MAX_PATH_LENGTH for x in self.boundary_paths]):
+        if any([x.length > settings.MAX_PATH_LENGTH for x in self.boundary_paths]):
             if local:
                 self.clean(local=True)
             else:
@@ -399,7 +400,7 @@ def check_connections(neurons, connected):
     '''
     pairs = combinations(neurons, 2)
 
-    for i,pair in enumerate(pairs):
+    for pair in pairs:
         # print("Checking connections between {i}th pair".format(i=i))
         # Do not perform check if both element in pair are in connected.
         if any([x not in connected for x in pair]):
@@ -423,21 +424,21 @@ def check_connections(neurons, connected):
 
             # Continue check if previous check didnt turn connected to True.
             if not connectFlag:
-                for p1 in pair[0].boundary_paths:
-                    for p2 in pair[1].boundary_paths:
-                        '''
-                        If not connected, then no nodes are commen in n1.nodes
-                        and n2.nodes. Then p1.origin must be different from
-                        p2.orgin.
-                        '''
-                        if (
-                            coor_equal(p1.dest.coor, p2.origin.coor) and \
-                            coor_equal(p2.dest.coor, p1.origin.coor)
-                            ):
-                            if p1.length + p2.length >= settings.MAX_PATH_LENGTH:
-                                pair[0].connect()
-                                pair[1].connect()
-                                break
+                for (p1, p2) in itertools.product(pair[0].boundary_paths, pair[1].boundary_paths):
+                    '''
+                    If not connected, then no nodes are common in n1.nodes
+                    and n2.nodes. Then p1.origin must be different from
+                    p2.orgin.
+                    '''
+                    if (
+                        coor_equal(p1.dest.coor, p2.origin.coor) and \
+                        coor_equal(p2.dest.coor, p1.origin.coor) and \
+                        p1.length + p2.length >= settings.MAX_PATH_LENGTH
+                        ):
+                            pair[0].connect()
+                            pair[1].connect()
+                            connectFlag = True
+                            break
 
 def stats_connections(neurons):
     '''Stats connected neurons.

@@ -11,6 +11,9 @@ T = 8
 # Neuron percentage. Ratio of neuron number to the number of total grid points.
 pn = 0.003
 
+# Consider local structure effects.
+Local = True
+
 
 ######## Neuron setting. ########
 
