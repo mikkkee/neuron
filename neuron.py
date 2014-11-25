@@ -1,7 +1,7 @@
 import math
 import random
 import copy
-from itertools import combinations
+from itertools import combinations, product
 
 from PIL import Image, ImageDraw
 import numpy as np
@@ -424,7 +424,7 @@ def check_connections(neurons, connected):
 
             # Continue check if previous check didnt turn connected to True.
             if not connectFlag:
-                for (p1, p2) in itertools.product(pair[0].boundary_paths, pair[1].boundary_paths):
+                for (p1, p2) in product(pair[0].boundary_paths, pair[1].boundary_paths):
                     '''
                     If not connected, then no nodes are common in n1.nodes
                     and n2.nodes. Then p1.origin must be different from
