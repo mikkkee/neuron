@@ -6,7 +6,7 @@
 N_run = 1
 
 # Number of timesteps to run.
-T = 20
+T = 30
 
 # Neuron percentage. Ratio of neuron number to the number of total grid points.
 pn = 0.3
@@ -22,7 +22,7 @@ Hands_low = 4
 Hands_high = 6
 
 # Grow speed of neuron branches.
-GROW_SPEED = 25
+GROW_SPEED = 10
 
 # Split probability of a branch when encounters a new node.
 SPLIT_PROBABILITY = 0.001

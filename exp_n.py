@@ -9,7 +9,7 @@ from neuron import Node, Path, Neuron
 from neuron import coor_equal, check_connections, stats_connections
 from neuron import pattern42, pattern6
 
-# import settings
+import settings
 
 
 def main(argv):
@@ -18,18 +18,9 @@ def main(argv):
     parser = argparse.ArgumentParser()
     parser.add_argument('n', type=int, default=0)
     parser.add_argument('--no-draw', dest='draw', action='store_false')
-    parser.add_argument('-s', '--settings', type=str,
-        default=None)
     parser.set_defaults(draw=True)
 
     args = parser.parse_args(argv[1:])
-
-    # settings file
-    if args.settings:
-        module_name = args.settings.split('.')[0]
-        settings = __import__(module_name)
-    else:
-        settings = __import__('settings')
 
     # Number of pattern edges
     if not args.n:
@@ -73,7 +64,6 @@ def main(argv):
         # Reset timestep and percentage.
         t = 0
         percentage = 0
-        connected = []
 
         # Assign color
         if draw_flag:
@@ -87,7 +77,7 @@ def main(argv):
                 print("Growing {i}th neuron...".format(i=i))
                 item.grow()
                 print("Cleaning {i}th neuron...".format(i=i))
-                item.clean(local=settings.Local)
+                item.clean()
 
             # Record connected neurons.
             connected = [x for x in neurons if x.connected]
@@ -106,10 +96,9 @@ def main(argv):
             # Check connections
             print("Checking connections...")
             check_connections(neurons, connected)
-            print("Connections checked.")
 
             # Percentage for previous step.
-            print r, t, percentage
+            print r, t+1, percentage
             if t not in data.keys():
                 data[t] = [percentage]
             else:

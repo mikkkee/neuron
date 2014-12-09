@@ -398,47 +398,63 @@ def check_connections(neurons, connected):
     connected - a list of neurons that are already connected. Do not perform
     check between a pair if both elements in the pair are in connected list.
     '''
+    connected_dict = {x: True for x in connected}
     pairs = combinations(neurons, 2)
+    print("    Generating pairs...")
+    pairs = [x for x in pairs if any([y not in connected for y in x])]
+    print("    {n} pairs generated.".format(n=len(pairs)))
 
     for pair in pairs:
-        # print("Checking connections between {i}th pair".format(i=i))
         # Do not perform check if both element in pair are in connected.
-        if any([x not in connected for x in pair]):
-            connectFlag = False
-            '''
-            Start checking for connections.
-            1. If n1.nodes and n2.nodes have common elements, they are connected
-            2. If n1.boundary_nodes and n2.boundary_nodes have commen elements,
-               go to step 3.
-            3. If the sum of common paths' length is larger than MAX_LEN,
-               they are connected.
-            '''
+        connectFlag = False
+        '''
+        Start checking for connections.
+        1. If n1.nodes and n2.nodes have common elements, they are connected
+        2. If n1.boundary_nodes and n2.boundary_nodes have commen elements,
+           go to step 3.
+        3. If the sum of common paths' length is larger than MAX_LEN,
+           they are connected.
+        '''
+        # print("    Generating node pairs...")
+        node_pairs = product(pair[0].nodes, pair[1].nodes)
+        # print(len(pair[0].nodes), len(pair[1].nodes))
+        # print("    {n} node pairs generated.".format(n=len(node_pairs)))
+        # print("    Comparing nodes....")
+        for n1, n2 in node_pairs:
+            if coor_equal(n1.coor, n2.coor):
+                pair[0].connect()
+                pair[1].connect()
+                connectFlag = True
+                break
+                print("        Node connected.")
+        # print("    Finished comparing nodes.")
+        '''
+        for node in pair[0].nodes:
+            # check for common nodes in internal nodes.
+            if any([coor_equal(node.coor, x.coor) for x in pair[1].nodes]):
+                pair[0].connect()
+                pair[1].connect()
+                connectFlag = True
+                break
+        '''
 
-            for node in pair[0].nodes:
-                # check for common nodes in internal nodes.
-                if any([coor_equal(node.coor, x.coor) for x in pair[1].nodes]):
-                    pair[0].connect()
-                    pair[1].connect()
-                    connectFlag = True
-                    break
-
-            # Continue check if previous check didnt turn connected to True.
-            if not connectFlag:
-                for (p1, p2) in product(pair[0].boundary_paths, pair[1].boundary_paths):
-                    '''
-                    If not connected, then no nodes are common in n1.nodes
-                    and n2.nodes. Then p1.origin must be different from
-                    p2.orgin.
-                    '''
-                    if (
-                        coor_equal(p1.dest.coor, p2.origin.coor) and \
-                        coor_equal(p2.dest.coor, p1.origin.coor) and \
-                        p1.length + p2.length >= settings.MAX_PATH_LENGTH
-                        ):
-                            pair[0].connect()
-                            pair[1].connect()
-                            connectFlag = True
-                            break
+        # Continue check if previous check didnt turn connected to True.
+        if not connectFlag:
+            for (p1, p2) in product(pair[0].boundary_paths, pair[1].boundary_paths):
+                '''
+                If not connected, then no nodes are common in n1.nodes
+                and n2.nodes. Then p1.origin must be different from
+                p2.orgin.
+                '''
+                if (
+                    coor_equal(p1.dest.coor, p2.origin.coor) and \
+                    coor_equal(p2.dest.coor, p1.origin.coor) and \
+                    p1.length + p2.length >= settings.MAX_PATH_LENGTH
+                    ):
+                        pair[0].connect()
+                        pair[1].connect()
+                        connectFlag = True
+                        break
 
 def stats_connections(neurons):
     '''Stats connected neurons.
@@ -506,7 +522,8 @@ def pattern6(nx, ny, p=0.3):
     img.save('pattern6.png', 'PNG')
 
     node_coors = random.sample(grid, n_neurons)
+    nodes = [Node(x, 6) for x in node_coors]
 
-    neurons = [Neuron(Node(x, 6)) for x in node_coors]
+    neurons = [Neuron(x) for x in nodes]
 
     return neurons
