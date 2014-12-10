@@ -35,7 +35,7 @@ def branch_p(tips, t, dt, h):
 
     return p
 
-def rotate_direction(direction):
+def rotate(direction):
     '''Rotate direction by a small degree alpha.
     Range of alpha is defined in settings.py'''
     alpha_min = settings.ALPHA_MIN
