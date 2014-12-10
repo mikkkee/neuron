@@ -35,18 +35,34 @@ def branch_p(tips, t, dt, h):
 
     return p
 
+def rotate_direction(direction):
+    '''Rotate direction by a small degree alpha.
+    Range of alpha is defined in settings.py'''
+    alpha_min = settings.ALPHA_MIN
+    alpha_max = settings.ALPHA_MAX
+    r = random.random()
+    alpha = alpha_min + (alpha_max - alpha_min) * r
+    x = direction[0] * math.cos(alpha) - direction[1] * math.sin(alpha)
+    y = direction[0] * math.sin(alpha) + direction[1] * math.cos(alpha)
+    return np.array([x, y])
+
 
 ########## Classes ##########
 
 
-class Node():
+class Node(object):
     '''Node class.
     Used to represent end point of segments in branches.'''
 
     # Read simulating settings from settings file.
+    # Average elongation velocity.
     ave_velocity = settings.AVE_VELOCITY
+    # Initial length for children segments.
     init_len = settings.INIT_LEN
+    # Time inteval between each step.
     timestep = settings.TIMESTEP
+    # Rate to change direction. (turns/length)
+    turns_rate = settings.TURNS_RATE
 
     def __init__(self, coor, parent, slope=None, height=None, branch=None):
         self.coor = coor
@@ -67,9 +83,22 @@ class Node():
         if ancestor:
             while ancestor.parent:
                 ancestor = ancestor.parent
-            return ancestor
+            self._root = ancestor
         else:
-            return self
+            self._root = self
+        return self._root
+
+    @property
+    def ancestors(self):
+        '''Return a list of ancestors of current node.
+        Current node itself is also an ancestor of it.'''
+        ancestors = [self]
+        p = self.parent
+        while p:
+            ancestors.append(p)
+            p = p.parent
+        self._ancestors = ancestors
+        return self._ancestors
 
     @property
     def leaves(self):
@@ -84,8 +113,30 @@ class Node():
             leaves += self.right.leaves
         else:
             leaves.append(self)
-        return leaves
+        self._leaves = leaves
+        return self._leaves
 
+    @property
+    def length(self):
+        '''Length of the segment determined by current node and its parent node.'''
+        end = np.array(self.coor)
+        start = np.array(self.parent.coor)
+        self._length = np.linalg.norm(end - start)
+        return self._length
+
+    @property
+    def cos(self):
+        '''Trigonometric functions sin related to slope.'''
+        self._cos = 1 / math.sqrt(1 + self.slope ** 2)
+        return self._cos
+
+    @property
+    def sin(self):
+        '''Trigonometric functions cos related to slope.'''
+        self._sin = self.cos * self.slope
+        return self._sin
+
+    @property
     def velocity(self):
         '''Return a velocity randomly sampled from a Gaussian distribution.'''
 
@@ -96,7 +147,6 @@ class Node():
         sigma = mu
 
         return np.random.normal(mu, sigma)
-
 
     def need_branch(self, t):
         '''Determine whether a tip node needs to branch at a timestep.
@@ -118,9 +168,78 @@ class Node():
         else:
             return False
 
+    def need_shift(self):
+        '''Determine whether a tip node needs to shift at a timestep.
+        Determined by multiply turning rate with the length to increase before
+        next timestep.
+        Turning rate has unit of turns/length.'''
 
+        # Velocity used for growing. Need to be passed to elongate.
+        v = self.velocity
+        # Shift probablity.
+        p = Node.turns_rate * v * Node.timestep
+        # Random test flag sampled from uniform distribution over [0,1).
+        r = random.random()
 
+        if r <= p:
+            return True, v
+        else:
+            return False, v
 
+    def direction(self):
+        '''Return a slope value for a child to use.
+        Read documents for details on how this slope value is generated.'''
+        direction = np.array([0, 0])
+        node = self
+        base_dist = 0
+        # Calculate direction from previous segments.
+        while node.parent:
+            # Unit vector of the segment represented by current node.
+            u = np.array([node.cos, node.sin])
+            # Volume of the segment represented by current node.
+            m = node.length
+            # Distance from the segment represented by current node to current node.
+            d = node.length / 2 + base_dist
+            # Increase base_dist to include the segment now considered.
+            base_dist += m
+            # Calculate direction.
+            direction += m/(d ** Node.dist_depend) * u
+            # Update node to be its parent.
+            node = node.parent
+
+        # Rotate the direction by a small degree alpha.
+        direction_rotated = rotate(direction)
+        while not direction_rotated[0]:
+            direction_rotated = rotate(direction)
+        return direction_rotated[1]/direction_rotated[0]
+
+    def elongate(self, length=None):
+        '''Elongate along current slope.
+        If length is not given, use v * timestep with v randomly sampled v from
+        self.velocity,else, use length.'''
+
+        # Length to elongate.
+        length = length if length else self.velocity * Node.timestep
+
+        # Calculate Trigonometric functions from slope.
+        cos = 1 / math.sqrt(1 + self.slope ** 2)
+        sin = cos * self.slope
+
+        # Calculate dx and dy from sin cos.
+        dx = length * cos
+        dy = length * sin
+
+        # New x and y.
+        x = self.coor[0] + dx
+        y = self.coor[1] + dy
+        self.coor = (x, y)
+
+        # Return new (x, y) for current node.
+        return (x, y)
+
+    def grow(self, t):
+        '''Grow for this tip node.'''
+        pass
 
 
 class Branch():
