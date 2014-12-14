@@ -237,9 +237,48 @@ class Node(object):
         # Return new (x, y) for current node.
         return (x, y)
 
+    def branch(self):
+        '''Branch to two sub branches. Each sub branch has an initial length.'''
+
+        # Generate two directions.
+        d1 = self.direction()
+        d2 = d1
+        while d2 == d1:
+            d2 = self.direction()
+        # Initiating two childeren.
+        self.left = Node(self.coor, self, d1, self.height + 1, self.branch)
+        self.right = Node(self.coor, self, d2, self.height + 1, self.branch)
+        # Initial length.
+        self.left.elongate(Node.init_len)
+        self.right.elongate(Node.init_len)
+
+    def shift(self):
+        '''Shift the direction of current segment.
+        It is the same as generating two children, initiate left child with
+        a new slope while initiate the right child to None.'''
+        # Generate a direction.
+        d1 = self.direction()
+        # Initiate left children with the generated slope.
+        self.left = Node(self.coor, self, d1, self.height + 1, self.branch)
+        self.right = None
+        # Grow for a time step.
+        self.left.elongate()
+
+
     def grow(self, t):
-        '''Grow for this tip node.'''
-        pass
+        '''Grow for this tip node.
+        1. Check if need to branch. If yes, branch; else go to step 2.
+        2. Check if need to shift. If yes, shift, else, go to step 3.
+        3. Elongate for a timestep.'''
+        rb = random.random()
+        rs = random.random()
+        if rb <= self.need_branch():
+            self.branch()
+        elif rs <= self.need_shift():
+            self.shift()
+        else:
+            self.elongate()
+
 
 
 class Branch():
