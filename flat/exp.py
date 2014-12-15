@@ -17,6 +17,10 @@ def main():
     n_dump = settings.N_DUMP
     # Timestep.
     timestep = settings.TIMESTEP
+    # Dump file name. Truncate dump file.
+    dumpfile = settings.DUMPFILE
+    d = open(dumpfile, 'w')
+    d.close()
     # Simulation area size.
     Lx = settings.LX
     Ly = settings.LY
@@ -34,7 +38,7 @@ def main():
 
 
     ########## Simulation Starts Here ##########
-
+    print("n_dump", n_dump)
     # Initiate each root node by calling their born() method.
     print("Simulation Starts Now!\n")
     print("Generating {n} neuron roots.\n".format(n=n_neurons))
@@ -42,6 +46,8 @@ def main():
         children = []
         for neuron in branch:
             children += neuron.born()
+        for child in children:
+            child.elongate()
         branch += children
 
     # Continue run until specified steps are reached.
@@ -57,12 +63,12 @@ def main():
                 if not (neuron.left or neuron.right):
                     # children can be one-elemented, two-elemented, or empty
                     # list.
-                    print("Growing\n")
-                    children += neuron.grow(step)
+                    print("Growing", neuron.coor)
+                    children += neuron.grow(step + 1)
             branch += children
 
         # Write neuron network to file at certain steps.
-        if n_dump and step % n_dump == 0:
+        if n_dump and (step % n_dump == 0):
             with open(dumpfile, 'a') as outname:
                 dump(neurons, outname, step)
 

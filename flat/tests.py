@@ -31,11 +31,12 @@ class RotateTest(TestCase):
     def test_rotate(self):
         if self.alpha_min == self.alpha_max == 0:
             self.direction = [1.0, 2.0]
-            self.assertEqual(rotate(self.direction), self.direction)
+            self.assertEqual(rotate(self.direction)[0], self.direction[0])
+            self.assertEqual(rotate(self.direction)[1], self.direction[1])
 
 
 class NodeTest(TestCase):
     '''Node Related tests.'''
 
     def setUp(self):
-        
+        pass

@@ -16,9 +16,9 @@ def dump(neurons, dumpfile, step):
     n_branches = len(neurons)
     n_nodes = sum([len(x) for x in neurons])
     # Write head info.
-    head = 'TIMESTEP: {s}\n'.format(s=step)
-    head += 'Number of branches: {nb}\n'.format(nb=n_branches)
-    head += 'Number of nodes: {nn}\n'.format(nn=n_nodes)
+    head = '\nTIMESTEP: {s}, '.format(s=step)
+    head += 'Number of Neurons: {nb}, '.format(nb=n_branches)
+    head += 'Number of nodes: {nn} \n'.format(nn=n_nodes)
     dumpfile.write(head)
     # Dump each branch in format of many segments.
     # e.g.
@@ -27,12 +27,12 @@ def dump(neurons, dumpfile, step):
     for i, branch in enumerate(neurons):
         # Write statistic info about the branch.
         n_branch_nodes = len(branch)
-        branch_info = 'Branch {i}\n'.format(i=i)
+        branch_info = 'Neuron {i}, '.format(i=i)
         branch_info += 'Number of nodes: {n}\n'.format(n=n_branch_nodes)
         dumpfile.write(branch_info)
         # Write segments to dumpfile.
         # Segments fmt string.
-        seg_fmt = "{c1[0]:4f} {c1[1]:4f} {c1[2]:4f} {c2[0]} {c2[1]} {c2[2]}\n"
+        seg_fmt = "{c1[0]:.4f} {c1[1]:.4f} {c2[0]:.4f} {c2[1]:.4f}\n"
         # Start writing.
         for neuron in branch:
             if neuron.left:
@@ -41,7 +41,7 @@ def dump(neurons, dumpfile, step):
                     )
             if neuron.right:
                 dumpfile.write(
-                    seg_fmt.format(c1=neuron.coor, c2=neruon.right.coor)
+                    seg_fmt.format(c1=neuron.coor, c2=neuron.right.coor)
                     )
 
 def random_coor(Lx, Ly, N=1):
@@ -109,6 +109,8 @@ class Node(object):
     timestep = settings.TIMESTEP
     # Rate to change direction. (turns/length)
     turns_rate = settings.TURNS_RATE
+    # Distance dependence parameter.
+    dist_depend = settings.DIST_DEPEND
 
     def __init__(self, coor, parent, slope=None, height=None, branch=None):
         self.coor = coor
@@ -199,7 +201,13 @@ class Node(object):
 
     def born(self):
         '''Initiating of a root node.'''
-        return []
+        # Generate slope for first neurite.
+        a, b = random.random(), 0
+        while b == 0:
+            b = random.random()
+        slope = a/b
+        self.left = Node(self.coor, parent=self, slope=slope, height=None, branch=self.branch)
+        return [self.left]
 
     def need_branch(self, step):
         '''Determine whether a tip node needs to branch at a timestep.
@@ -246,6 +254,7 @@ class Node(object):
         node = self
         base_dist = 0
         # Calculate direction from previous segments.
+        print("while 1 in direction started.")
         while node.parent:
             # Unit vector of the segment represented by current node.
             u = np.array([node.cos, node.sin])
@@ -259,7 +268,8 @@ class Node(object):
             direction += m/(d ** Node.dist_depend) * u
             # Update node to be its parent.
             node = node.parent
-
+        print("while 1 in direction finished.")
+        print(direction)
         # Rotate the direction by a small degree alpha.
         direction_rotated = rotate(direction)
         while not direction_rotated[0]:
@@ -333,16 +343,26 @@ class Node(object):
         1. Check if need to branch. If yes, branch; else go to step 2.
         2. Check if need to shift. If yes, shift, else, go to step 3.
         3. Elongate for a timestep.'''
+        if not self.parent:
+            return []
         # Random number for branching determination.
         rb = random.random()
         # Random number for shifting determination.
         rs = random.random()
         if rb <= self.need_branch(step):
+            print("Branching.")
             children = self.branch()
         elif rs <= self.need_shift():
+            print('Shifting.')
             children = self.shift()
         else:
+            print('Elongating.')
             self.elongate()
             children = []
 
         return children
+
+
+class Segment(object):
+    '''Class of segment. Used for determine whether there exist any
+    intersection points between two sets of segments.'''

@@ -3,7 +3,7 @@
 ############################################
 
 # Number of Neurons.
-N_NEURONS = 1
+N_NEURONS = 2
 
 # Lengths of simulation area.
 # TODO: units.
@@ -19,7 +19,7 @@ N_RUNS = 5
 
 # Dump frequency - dump neuron network to file every this number of steps.
 # 0 - do not dump.
-N_DUMP = 5
+N_DUMP = 1
 
 # Output file name.
 DUMPFILE = 'test.txt'
@@ -55,7 +55,11 @@ BRANCH_COMPETETION_E = 1
 # Parameter determine influence of segments with different heights.
 TOPOLOGICAL_PARA_S = 1
 
+# Parameter determin influence of segments with different distances to the tip
+# node on shifting direction.
+DIST_DEPEND = 0
+
 # Minimal and maximumal rotation angle.
 # Unit: rad.
-ALPHA_MIN = 0.0
-ALPHA_MAX = 0.0
+ALPHA_MIN = -0.6
+ALPHA_MAX = 0.6
