@@ -1,3 +1,40 @@
+############################################
+########## Individual Run Related ##########
+############################################
+
+# Number of Neurons.
+N_NEURONS = 1
+
+# Lengths of simulation area.
+# TODO: units.
+LX = 2000.0
+LY = 2000.0
+
+# Timestep length.
+# TODO: Add required units.
+TIMESTEP = 5.0
+
+# Run time - number of timesteps to run.
+N_RUNS = 500
+
+# Average elongation velocity.
+# TODO: Add required units.
+AVE_VELOCITY = 5
+
+# Initial length for children.
+# TODO: Add required units.
+INIT_LEN = 5.0
+
+# Turns rate. How many turns a neurite makes during one unit of time.
+# unit: turns/length.
+TURNS_RATE = 5
+
+
+
+##################################################
+########## Simulation Mechanism Related ##########
+##################################################
+
 # Expected number of branching events at an isolated segment with infinite
 # period of time - B.
 BRANCH_COUNT_INFINITE = 5
@@ -12,21 +49,6 @@ BRANCH_COMPETETION_E = 1
 TOPOLOGICAL_PARA_S = 1
 
 # Minimal and maximumal rotation angle.
+# Unit: rad.
 ALPHA_MIN = 0.0
 ALPHA_MAX = 0.0
-
-# Average elongation velocity.
-# TODO: Add required units.
-AVE_VELOCITY = 5
-
-# Initial length for children.
-# TODO: Add required units.
-INIT_LEN = 5.0
-
-# Timestep length.
-# TODO: Add required units.
-TIMESTEP = 5.0
-
-# Turns rate. How many turns a neurite makes during one unit of time.
-# unit: turns/length.
-TURNS_RATE = 5

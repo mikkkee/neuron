@@ -246,11 +246,17 @@ class Node(object):
         while d2 == d1:
             d2 = self.direction()
         # Initiating two childeren.
-        self.left = Node(self.coor, self, d1, self.height + 1, self.branch)
-        self.right = Node(self.coor, self, d2, self.height + 1, self.branch)
+        self.left = Node(
+            self.coor, parent=self, slope=d1, height=None, branch=self.branch
+            )
+        self.right = Node(
+            self.coor, parent=self, slope=d2, height=None, branch=self.branch
+            )
         # Initial length.
         self.left.elongate(Node.init_len)
         self.right.elongate(Node.init_len)
+
+        return [self.left, self.right]
 
     def shift(self):
         '''Shift the direction of current segment.
@@ -259,10 +265,14 @@ class Node(object):
         # Generate a direction.
         d1 = self.direction()
         # Initiate left children with the generated slope.
-        self.left = Node(self.coor, self, d1, self.height + 1, self.branch)
+        self.left = Node(
+            self.coor, parent=self, slope=d1, height=None, branch=self.branch
+            )
         self.right = None
         # Grow for a time step.
         self.left.elongate()
+        # Return new neurons to append them to their branches.
+        return [self.left]
 
 
     def grow(self, t):
