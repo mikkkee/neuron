@@ -366,3 +366,4 @@ class Node(object):
 class Segment(object):
     '''Class of segment. Used for determine whether there exist any
     intersection points between two sets of segments.'''
+    pass
