@@ -15,7 +15,14 @@ LY = 2000.0
 TIMESTEP = 5.0
 
 # Run time - number of timesteps to run.
-N_RUNS = 500
+N_RUNS = 5
+
+# Dump frequency - dump neuron network to file every this number of steps.
+# 0 - do not dump.
+N_DUMP = 5
+
+# Output file name.
+DUMPFILE = 'test.txt'
 
 # Average elongation velocity.
 # TODO: Add required units.
