@@ -366,4 +366,13 @@ class Node(object):
 class Segment(object):
     '''Class of segment. Used for determine whether there exist any
     intersection points between two sets of segments.'''
-    pass
+
+    def __init__(self, coor1, coor2):
+        '''coor1 and coor2 are the two endpoints of a segment.'''
+        self.p1 = coor1
+        self.p2 = coor2
+
+    def intersection(self, seg):
+        '''Calculate intersection point bewteen self and another
+        segment seg.'''
+        pass
