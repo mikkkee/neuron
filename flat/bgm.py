@@ -7,7 +7,9 @@ import numpy as np
 import settings
 
 
+###############################
 ########## Functions ##########
+###############################
 
 
 def dump(neurons, dumpfile, step):
@@ -93,7 +95,10 @@ def rotate(direction):
     return np.array([x, y])
 
 
+
+#############################
 ########## Classes ##########
+#############################
 
 
 class Node(object):
@@ -206,7 +211,9 @@ class Node(object):
         while b == 0:
             b = random.random()
         slope = a/b
-        self.left = Node(self.coor, parent=self, slope=slope, height=None, branch=self.branch)
+        self.left = Node(
+            self.coor, parent=self, slope=slope, height=None, branch=self.branch
+            )
         return [self.left]
 
     def need_branch(self, step):
@@ -363,16 +370,71 @@ class Node(object):
         return children
 
 
+class Point(object):
+    '''Endpoint of a segment.'''
+    def __init__(self, coor):
+        self.coor = coor
+
+    @property
+    def isleft(self):
+        return self == self.segment.left
+
+    @property
+    def isright(self):
+        return self == self.segment.right
+
+    @property
+    def segment(self):
+        try:
+            return self._segment
+        except AttributeError:
+            return None
+
+
+
 class Segment(object):
     '''Class of segment. Used for determine whether there exist any
     intersection points between two sets of segments.'''
 
-    def __init__(self, coor1, coor2):
+    def __init__(self, point1, point2, branch=0):
         '''coor1 and coor2 are the two endpoints of a segment.'''
-        self.p1 = coor1
-        self.p2 = coor2
+        if point1.coor[0] < point2.coor[0]:
+            self.left = point1
+            self.right = point2
+        elif point1.coor[0] == point2.coor[0] and \
+            point1.coor[1] <= point2.coor[1]:
+                self.left = point1
+                self.right = point2
+        else:
+            self.left = point2
+            self.right = point1
 
-    def intersection(self, seg):
+        point1._segment = self
+        point2._segment = self
+        self.branch = branch
+
+    def intersects(self, seg):
         '''Calculate intersection point bewteen self and another
-        segment seg.'''
-        pass
+        segment seg.
+        Read documents for mechanism.'''
+        p = np.array(self.left.coor)
+        r = np.array(self.right.coor) - p
+        q = np.array(seg.left.coor)
+        s = np.array(seg.right.coor) - q
+
+        if np.cross(r, s) == 0:
+            if np.cross(q - p, r) != 0:
+                return False
+            elif 0 <= np.inner(q - p, r) <= np.inner(r, r) or \
+                0 <= np.inner(p - q, s) <= np.inner(s, s):
+                return True
+            else:
+                return False
+        else:
+            btm = np.cross(r, s)
+            t = np.cross(q - p, s) / btm
+            u = np.cross(q - p, r) / btm
+            if 0 <= t <= 1 and 0 <= u <= 1:
+                return True
+            else:
+                return False
