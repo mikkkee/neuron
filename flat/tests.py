@@ -57,6 +57,27 @@ class PointTest(TestCase):
         self.assertTrue(self.p1.isleft and self.p2.isright)
         self.assertFalse(self.p1.isright or self.p2.isleft)
 
+    def test_lt(self):
+        p = Point((0, 0.5))
+        self.assertTrue(self.p1 < p)
+        self.assertTrue(self.p1 < self.p2)
+        self.assertFalse(p < self.p1)
+        self.assertFalse(self.p2 < self.p1)
+        self.assertFalse(self.p1 < self.p1)
+
+    def test_eq(self):
+        p = Point((0, 0.0000000000001))
+        self.assertTrue(self.p1 == p)
+        self.assertFalse(self.p1 == self.p2)
+
+    def test_gt__(self):
+        p = Point((1, 0.5))
+        self.assertTrue(p > self.p1)
+        self.assertTrue(self.p2 > self.p1)
+        self.assertTrue(p > self.p2)
+        self.assertFalse(self.p1 > self.p2)
+        self.assertFalse(self.p2 > p)
+
 
 class SegmentTest(TestCase):
     '''Segment related.'''

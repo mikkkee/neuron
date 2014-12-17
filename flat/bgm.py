@@ -7,9 +7,12 @@ import numpy as np
 import settings
 
 
-###############################
+############################
+########## Neuron ##########
+############################
+
+
 ########## Functions ##########
-###############################
 
 
 def dump(neurons, dumpfile, step):
@@ -96,9 +99,7 @@ def rotate(direction):
 
 
 
-#############################
 ########## Classes ##########
-#############################
 
 
 class Node(object):
@@ -370,10 +371,72 @@ class Node(object):
         return children
 
 
+
+###########################################
+########## Intersection Analysis ##########
+###########################################
+
+
+########## Functions ##########
+
+def xyorder(p1, p2):
+    '''Determine the order of two points.
+    Returns +1 if p1 > p2; -1 if p1 < p2; 0 if p1 == p2.'''
+    if p1.x > p2.x:
+        return 1
+    if p1.x < p2.x:
+        return -1
+    if p1.y > p2.y:
+        return 1
+    if p1.y < p2.y:
+        return -1
+    return 0
+
+def float_eq(x1, x2):
+    '''Equal between two float point numbers.'''
+    if abs(x1 - x2) <= 0.0000001:
+        return True
+    return False
+
+
+########## Classes ##########
+
 class Point(object):
     '''Endpoint of a segment.'''
     def __init__(self, coor):
         self.coor = coor
+        self._x = coor[0]
+        self._y = coor[1]
+
+    def __eq__(self, other):
+        '''Equal are guarenteed by float_eq().'''
+        if float_eq(self.x, other.x) and float_eq(self.y, other.y):
+            return True
+        return False
+
+    def __gt__(self, other):
+        '''Comparisons are made x first then y.'''
+        if self.x > other.x:
+            return True
+        if float_eq(self.x, other.x) and self.y > other.y:
+            return True
+        return False
+
+    def __lt__(self, other):
+        '''Comparisons are made x first then y.'''
+        if self.x < other.x:
+            return True
+        if float_eq(self.x, other.x) and self.y < other.y:
+            return True
+        return False
+
+    @property
+    def x(self):
+        return self._x
+
+    @property
+    def y(self):
+        return self._y
 
     @property
     def isleft(self):
@@ -389,7 +452,6 @@ class Point(object):
             return self._segment
         except AttributeError:
             return None
-
 
 
 class Segment(object):
@@ -438,3 +500,75 @@ class Segment(object):
                 return True
             else:
                 return False
+
+
+class TreeNode(object):
+    '''Tree node of red-black tree.'''
+
+    def __init__(self, key=None):
+        self.key = key
+        self.left = None
+        self.right = None
+        self.parent = None
+
+
+class RBT(object):
+    '''A red-black tree used for implementing Bentley-Ottmann Algorithm.'''
+
+    def __init__(self, key=None):
+        '''Initiate with a root.'''
+        self.root = TreeNode(key) if key else None
+
+    def find(self, key, x=self.root):
+        '''Find node from the tree.'''
+        if x == None or x.key == key:
+            return x
+        if key < x.key:
+            return self.find(key, x.left)
+        else:
+            return self.find(key, x.right)
+
+    def next(self, node):
+        '''Successor of one node.'''
+        if node.right:
+            return self.minimum(node.right)
+        p = node.parent
+        while p is not None and node == p.right:
+            node = p
+            p = p.parent
+        return p
+
+
+    def prev(self, key):
+        '''Predecessor of one node.'''
+        pass
+
+    def insert(self, key):
+        '''Insert a new node into the Red-Black Tree.'''
+        pass
+
+    def insert_fixup(self, key):
+        pass
+
+    def delete(self, key):
+        '''Delete a node from the tree.'''
+        pass
+
+    def delete_fixup(self, key):
+        pass
+
+    def left_rotate(self, key):
+        '''Left rotate operation.'''
+        pass
+
+
+
+
+class EventQ(object):
+    '''Event queue used for implementing Bentley-Ottmann Algorithm.'''
+    pass
+
+
+class SweepLine(object):
+    '''Swipe line used for implementing Bentley-Ottmann Algorithm.'''
+    pass
