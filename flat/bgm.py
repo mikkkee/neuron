@@ -510,6 +510,7 @@ class TreeNode(object):
         self.left = None
         self.right = None
         self.parent = None
+        self.color = None
 
 
 class RBT(object):
@@ -518,6 +519,7 @@ class RBT(object):
     def __init__(self, key=None):
         '''Initiate with a root.'''
         self.root = TreeNode(key) if key else None
+        self.root.color = BLACK
 
     def find(self, key, x=self.root):
         '''Find node from the tree.'''
@@ -528,24 +530,66 @@ class RBT(object):
         else:
             return self.find(key, x.right)
 
+    def minimum(self, node):
+        '''Return minimum node in the subtree rooted at node.'''
+        while node.left:
+            node = node.left
+        return node
+
+    def maximum(self, node):
+        '''Return maximum node in the subtree rooted at node.'''
+        while node.right:
+            node = node.right
+        return node
+
     def next(self, node):
-        '''Successor of one node.'''
+        '''Successor of one node.
+        If node.right is None, the node's successor is its nearest ancestor
+        whose left child is also the node's ancestor (a node is an ancestor
+        of itself).'''
         if node.right:
             return self.minimum(node.right)
         p = node.parent
-        while p is not None and node == p.right:
+        while p and node == p.right:
             node = p
             p = p.parent
         return p
 
+    def prev(self, node):
+        '''Predecessor of one node.
+        Symmetric to successor.'''
+        if node.left:
+            return self.maximum(node.left)
+        p = node.parent
+        while p and node == p.left:
+            node = p
+            p = p.parent
+        return p
 
-    def prev(self, key):
-        '''Predecessor of one node.'''
-        pass
-
-    def insert(self, key):
+    def insert(self, node):
         '''Insert a new node into the Red-Black Tree.'''
-        pass
+        y = None
+        x = self.root
+        while x:
+            y = x
+            if node.key < x.key:
+                x = x.left
+            else:
+                x = x.right
+
+        node.parent = y
+
+        if not y:
+            self.root = node
+        elif node.key < y.key:
+            y.left = node
+        else:
+            y.right = node
+
+        node.left = None
+        node.right = None
+        node.color = RED
+        self.insert_fixup(node)
 
     def insert_fixup(self, key):
         pass
@@ -557,9 +601,22 @@ class RBT(object):
     def delete_fixup(self, key):
         pass
 
-    def left_rotate(self, key):
+    def left_rotate(self, node):
         '''Left rotate operation.'''
-        pass
+        y = x.right
+        x.right = y.left
+        if y.left:
+            y.left.parent = x
+        y.parent = x.parent
+        if not x.parent:
+            self.root = y
+        elif x == x.parent.left:
+            x.parent.left = y
+        else:
+            x.parent.right = y
+        y.left = x
+        x.parent = y
+
 
 
 
