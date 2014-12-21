@@ -270,7 +270,7 @@ class Node(object):
             m = node.length
             # Distance from the segment represented by current node to current node.
             d = node.length / 2 + base_dist
-            # Increase base_dist to include the segment now considered.
+            # Increase base_dist to include the segment now conside'RED'.
             base_dist += m
             # Calculate direction.
             direction += m/(d ** Node.dist_depend) * u
@@ -503,7 +503,7 @@ class Segment(object):
 
 
 class TreeNode(object):
-    '''Tree node of red-black tree.'''
+    '''Tree node of 'RED'-'BLACK' tree.'''
 
     def __init__(self, key=None):
         self.key = key
@@ -514,12 +514,12 @@ class TreeNode(object):
 
 
 class RBT(object):
-    '''A red-black tree used for implementing Bentley-Ottmann Algorithm.'''
+    '''A 'RED'-'BLACK' tree used for implementing Bentley-Ottmann Algorithm.'''
 
     def __init__(self, key=None):
         '''Initiate with a root.'''
         self.root = TreeNode(key) if key else None
-        self.root.color = BLACK
+        self.root.color = 'BLACK'
 
     def find(self, key, x=self.root):
         '''Find node from the tree.'''
@@ -556,7 +556,7 @@ class RBT(object):
         return p
 
     def prev(self, node):
-        '''Predecessor of one node.
+        '''P'RED'ecessor of one node.
         Symmetric to successor.'''
         if node.left:
             return self.maximum(node.left)
@@ -567,7 +567,7 @@ class RBT(object):
         return p
 
     def insert(self, node):
-        '''Insert a new node into the Red-Black Tree.'''
+        '''Insert a new node into the 'RED'-'BLACK' Tree.'''
         y = None
         x = self.root
         while x:
@@ -588,11 +588,28 @@ class RBT(object):
 
         node.left = None
         node.right = None
-        node.color = RED
+        node.color = 'RED'
         self.insert_fixup(node)
 
-    def insert_fixup(self, key):
-        pass
+    def insert_fixup(self, node):
+        while node.parent and node.parent.color == 'RED':
+            if node.parent.parent:
+                if node.parent == node.parent.parent.left:
+                    y = node.parent.parent.right
+                    if y and y.color == 'RED':
+                        node.parent.color = 'BLACK'
+                        y.color = 'BLACK'
+                        node.parent.parent = 'BLACK'
+                        node = node.parent.parent
+                    else:
+                        if node == node.parent.right:
+                            node = node.parent
+                            self.left_rotate(node)
+                        node.parent.color = 'BLACK'
+                        node.parent.parent.color = 'RED'
+                        self.right_rotate(node.parent.parent)
+
+
 
     def delete(self, key):
         '''Delete a node from the tree.'''
@@ -616,6 +633,9 @@ class RBT(object):
             x.parent.right = y
         y.left = x
         x.parent = y
+
+    def right_rotate(self, node):
+        pass
 
 
 
