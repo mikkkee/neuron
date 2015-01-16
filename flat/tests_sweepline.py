@@ -1,45 +1,6 @@
 from unittest import TestCase
 
-from bgm import Node, Point, Segment
-from bgm import dump, random_coor, branch_prob, rotate
-
-import settings
-
-
-class RandomCoorTest(TestCase):
-    '''Tests for random_coor() function.'''
-
-    def setUp(self):
-        self.n = 3
-        self.x = 100
-        self.y = 100
-
-    def test_return_n(self):
-        '''Shoud return a list of self.n different tuples.'''
-        self.result = random_coor(self.x, self.y, self.n)
-        self.assertEqual(len(self.result), self.n)
-        self.assertEqual(len(set(self.result)), self.n)
-
-
-class RotateTest(TestCase):
-    '''Test when alpha_min == alpha_max == 0.'''
-
-    def setUp(self):
-        self.alpha_min = settings.ALPHA_MIN
-        self.alpha_max = settings.ALPHA_MAX
-
-    def test_rotate(self):
-        if self.alpha_min == self.alpha_max == 0:
-            self.direction = [1.0, 2.0]
-            self.assertEqual(rotate(self.direction)[0], self.direction[0])
-            self.assertEqual(rotate(self.direction)[1], self.direction[1])
-
-
-class NodeTest(TestCase):
-    '''Node Related tests.'''
-
-    def setUp(self):
-        pass
+from sweepline import Point, Segment, SweepLine, EventQueue
 
 
 class PointTest(TestCase):
@@ -48,6 +9,15 @@ class PointTest(TestCase):
     def setUp(self):
         self.p1 = Point((0, 0))
         self.p2 = Point((1, 0))
+        self.p3 = Point([0, -1])
+        self.p4 = Point([-1, 0])
+        self.p5 = Point([0, 1])
+
+    def test_point_sort(self):
+        '''Test to sort points by x first then y.'''
+        point_list = [self.p1, self.p2, self.p3, self.p4, self.p5]
+        point_list.sort()
+        self.assertEqual(point_list, [self.p4, self.p3, self.p1, self.p5, self.p2])
 
     def test_no_seg(self):
         self.assertFalse(self.p1.segment or self.p2.segment)

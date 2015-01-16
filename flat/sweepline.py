@@ -3,8 +3,11 @@ Use Sweepline algorithm, or Bentley-Ottmann algorithm to analysis intersections
 between different neurites.
 For details of sweepline algorithm, visit
 http://geomalgorithms.com/a09-_intersect-3.html .
-'''
 
+Procedures:
+
+'''
+import numpy as np
 from llrbt import NIL, Node, Tree
 
 
@@ -41,25 +44,29 @@ class Point(object):
 
     def __eq__(self, other):
         '''Equal are guarenteed by float_eq().'''
-        if float_eq(self.x, other.x) and float_eq(self.y, other.y):
-            return True
-        return False
+        if isinstance(other, Point):
+            return float_eq(self.x, other.x) and float_eq(self.y, other.y)
+        return NotImplemented
 
     def __gt__(self, other):
         '''Comparisons are made x first then y.'''
-        if self.x > other.x:
-            return True
-        if float_eq(self.x, other.x) and self.y > other.y:
-            return True
-        return False
+        if isinstance(other, Point):
+            if self.x > other.x:
+                return True
+            if float_eq(self.x, other.x) and self.y > other.y:
+                return True
+            return False
+        return NotImplemented
 
     def __lt__(self, other):
         '''Comparisons are made x first then y.'''
-        if self.x < other.x:
-            return True
-        if float_eq(self.x, other.x) and self.y < other.y:
-            return True
-        return False
+        if isinstance(other, Point):
+            if self.x < other.x:
+                return True
+            if float_eq(self.x, other.x) and self.y < other.y:
+                return True
+            return False
+        return NotImplemented
 
     @property
     def x(self):
@@ -71,11 +78,15 @@ class Point(object):
 
     @property
     def isleft(self):
-        return self == self.segment.left
+        if self.segment:
+            return self == self.segment.left
+        return False
 
     @property
     def isright(self):
-        return self == self.segment.right
+        if self.segment:
+            return self == self.segment.right
+        return False
 
     @property
     def segment(self):
@@ -114,6 +125,8 @@ class Segment(object):
     def intersects(self, seg):
         '''Calculate intersection point bewteen self and another
         segment seg.
+        Return True is two segments overlap, False if two segments do not
+        intersect, intersection point if two segments have intersection.
         Read documents for mechanism.'''
         p = np.array(self.left.coor)
         r = np.array(self.right.coor) - p
@@ -133,6 +146,81 @@ class Segment(object):
             t = np.cross(q - p, s) / btm
             u = np.cross(q - p, r) / btm
             if 0 <= t <= 1 and 0 <= u <= 1:
-                return True
+                coor = p + t * r
+                intersection = Point(coor)
+                return intersection
             else:
                 return False
+
+    def __gt__(self, seg):
+        '''A segment is considered to be greater than another if it is above
+        the left point of another segment.
+        '''
+        if isinstance(seg, Segment):
+            point = seg.left
+            y = (self.right.y - self.left.y)/(self.right.x - self.left.x) * (point.x - self.left.x) + self.left.y
+            return y > point.y
+        return NotImplemented
+
+    def __lt__(self, seg):
+        '''A segment is considered to be less than another segment if it is
+        below the left point of another segment.
+        '''
+        if isinstance(seg, Segment):
+            point = seg.left
+            y = (self.right.y - self.left.y)/(self.right.x - self.left.x) * (point.x - self.left.x) + self.left.y
+            return y < point.y
+        return NotImplemented
+
+    def __eq__(self, seg):
+        '''A segment is considered to be equal to another segment if they have
+        the same left and right point.
+        '''
+        if isinstance(seg, Segment):
+            return self.left == seg.left and self.right == seg.right
+
+
+class SweepLine(Tree):
+    '''Sweep line class.'''
+
+    def insert(self, node):
+        '''Insert a node into SweepLine and change the corresponding
+        above-below relation.
+        '''
+        super(SweepLine, self).insert(node)
+        node.below = self.predecessor(node)
+        node.above = self.successor(node)
+        node.below.above = node
+        node.above.below = node
+
+    def delete(self, node):
+        '''Delete a node from SweepLine and change the corresponding
+        above-below relation.
+        Since Tree.delete() does not return the node be deleted, you have to
+        find the node to be deleted before delete it. That is:
+        node = SL.find(key=seg)
+        SL.delete(node)
+        Do not delete by using another node object with the same key:
+        SL.delete(Node(seg)).
+        '''
+        super(SweepLine, self).delete(node)
+        if node.above == node:
+            node.below.above = node.below
+        else:
+            node.below.above = node.above
+
+        if node.below == node:
+            node.above.below = node.above
+        else:
+            node.above.below = node.below
+
+
+class EventQueue(Tree):
+    '''Event queue class used to maintain segment end points and intersection
+    points.
+    '''
+    def pop(self):
+        '''Delete the minimum node.'''
+        to_pop = self.min()
+        self.delete_min()
+        return to_pop
