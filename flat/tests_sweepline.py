@@ -1,3 +1,4 @@
+from __future__ import print_function
 from unittest import TestCase
 
 from sweepline import Point, Segment, SweepLine, EventQueue
@@ -60,16 +61,21 @@ class SegmentTest(TestCase):
         self.p5 = Point((1, 0))
 
     def test_seg_left_right(self):
+        '''Test for setting left and right end points.'''
         self.seg1 = Segment(self.p1, self.p2, 1)
         self.assertTrue(self.p1.isleft and self.p2.isright)
 
     def test_seg_intersects(self):
         '''Test for intersection judgement.'''
 
-        # Two segments intersect with each other.
+        # Two segments intersect with each other. self.intersects() gives
+        # the right intersection point.
         self.seg1 = Segment(self.p1, self.p4, 1)
         self.seg2 = Segment(self.p3, self.p5, 1)
-        self.assertTrue(self.seg1.intersects(self.seg2))
+        intersection = self.seg1.intersects(self.seg2)
+        self.assertTrue(intersection)
+        self.assertTrue(isinstance(intersection, Point))
+        self.assertTrue(intersection == Point((0.5, -0.5)))
 
         # Two segments do not intersect.
         self.seg1 = Segment(self.p1, self.p5, 1)

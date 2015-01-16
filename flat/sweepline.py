@@ -48,6 +48,12 @@ class Point(object):
             return float_eq(self.x, other.x) and float_eq(self.y, other.y)
         return NotImplemented
 
+    def __ne__(self, other):
+        '''Not equal.'''
+        if isinstance(other, Point):
+            return not self.__eq__(other)
+        return NotImplemented
+
     def __gt__(self, other):
         '''Comparisons are made x first then y.'''
         if isinstance(other, Point):
@@ -142,11 +148,12 @@ class Segment(object):
             else:
                 return False
         else:
-            btm = np.cross(r, s)
+            # np.array() and np.cross() does not guarantee float number.
+            btm = float(np.cross(r, s))
             t = np.cross(q - p, s) / btm
             u = np.cross(q - p, r) / btm
             if 0 <= t <= 1 and 0 <= u <= 1:
-                coor = p + t * r
+                coor = tuple(p + t * r)
                 intersection = Point(coor)
                 return intersection
             else:
