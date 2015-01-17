@@ -35,10 +35,16 @@ def float_eq(x1, x2):
 
 ########## Classes ##########
 
+class TreeNode(Node):
+    '''Rename llrbt.Node to sweepline.TreeNode to avoid name conflict with
+    bgm.Node
+    '''
+    pass
+
 class Point(object):
     '''Endpoint of a segment.'''
     def __init__(self, coor):
-        self.coor = coor
+        self._coor = coor
         self._x = coor[0]
         self._y = coor[1]
 
@@ -76,6 +82,23 @@ class Point(object):
                 return True
             return False
         return NotImplemented
+
+    @property
+    def coor(self):
+        return self._coor
+
+    @coor.setter
+    def coor(self, value):
+        try:
+            if len(value) == 2:
+                value = [float(x) for x in value]
+            else:
+                raise NotImplemented
+        except ValueError:
+            raise NotImplemented
+        self._coor = value
+        self._x = value[0]
+        self._y = value[1]
 
     @property
     def x(self):
@@ -192,9 +215,17 @@ class Segment(object):
         if isinstance(seg, Segment):
             return self.left == seg.left and self.right == seg.right
 
+    def __ne__(self, seg):
+        return not self.__eq__(seg)
+
 
 class SweepLine(Tree):
     '''Sweep line class.'''
+
+    def __init__(self, node):
+        super(SweepLine, self).__init__(node)
+        self.root.above = self.root
+        self.root.below = self.root
 
     def insert(self, node):
         '''Insert a node into SweepLine and change the corresponding
@@ -234,6 +265,6 @@ class EventQueue(Tree):
     '''
     def pop(self):
         '''Delete the minimum node.'''
-        to_pop = self.min()
+        to_pop = self.minimum(self.root)
         self.delete_min()
         return to_pop
