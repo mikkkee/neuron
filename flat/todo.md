@@ -4,5 +4,6 @@
 # Analyze results
 
 - [x] Functions to parse result file into grouped segments.
-- [ ] Implement Sweep line algorithm.
-- [ ] Main analysis procedure.
+- [x] Implement Sweep line algorithm.
+- [x] Main analysis procedure.
+- [ ] Stay clear when dealing with TreeNode and TreeNode.key
