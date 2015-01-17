@@ -42,6 +42,9 @@ class Point(object):
         self._x = coor[0]
         self._y = coor[1]
 
+    def __repr__(self):
+        return "Pt:({:.3f}, {:.3f})".format(self.x, self.y)
+
     def __eq__(self, other):
         '''Equal are guarenteed by float_eq().'''
         if isinstance(other, Point):
@@ -127,6 +130,9 @@ class Segment(object):
         point1.segment = self
         point2.segment = self
         self.branch = branch
+
+    def __repr__(self):
+        return 'Seg({}, {}, {})'.format(self.left.__repr__(), self.right.__repr__(), self.branch)
 
     def intersects(self, seg):
         '''Calculate intersection point bewteen self and another
