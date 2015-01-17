@@ -8,7 +8,7 @@ from sweepline import Point, Segment, SweepLine, EventQueue
 
 ########## Parse simulation files ##########
 
-def _parse_segments(lines, branch=None):
+def _parse_to_segments(lines, branch=None):
     '''Parse list of lines into segments.
     The segments may belong to one branch of Neuron.
     Format of a line: p1.x p1.y p2.x p2.y
@@ -35,6 +35,7 @@ def _group_by_neuron(neuron_lines):
             neuron = []
         else:
             neuron.append(line)
+    neuron_list.append(neuron)
     return neuron_list
 
 def _group_by_timestep(time_lines):
@@ -42,7 +43,8 @@ def _group_by_timestep(time_lines):
     time_list = []
     timestep = []
 
-    for line in time_list:
+    for line in time_lines:
+        line = line.strip()
         if line.startswith('TIMESTEP'):
             # Starts another timestep when encounters 'TIMESTEP'.
             # If it is not the first time, store current timestep to the list.
@@ -50,10 +52,12 @@ def _group_by_timestep(time_lines):
                 time_list.append(timestep)
             timestep = []
         else:
-            timestep.append(line)
+            if line:
+                timestep.append(line)
+    time_list.append(timestep)
     return time_list
 
-def parse_results(outfile):
+def parse_result(outfile):
     '''Parse simulation file into neuron nodes grouped by neurons and timesteps.
     '''
     time_lines = outfile.readlines()
@@ -62,4 +66,7 @@ def parse_results(outfile):
     timestep_neuron_list = []
 
     for neuron_lines in timestep_list:
-        timestep_neuron_list.append(_group_by_neuron(neuron_lines))
+        neurons = [_parse_to_segments(x, i) for i, x in enumerate(_group_by_neuron(neuron_lines))]
+        timestep_neuron_list.append(neurons)
+
+    return timestep_neuron_list
