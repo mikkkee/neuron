@@ -58,7 +58,7 @@ def _group_by_timestep(time_lines):
     return time_list
 
 def parse_result(outfile):
-    '''Parse simulation file into neuron nodes grouped by neurons and timesteps.
+    '''Parse simulation file into segments grouped by neurons and timesteps.
     '''
     time_lines = outfile.readlines()
     timestep_list = _group_by_timestep(time_lines)
