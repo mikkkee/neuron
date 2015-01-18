@@ -3,7 +3,7 @@
 ############################################
 
 # Number of Neurons.
-N_NEURONS = 2
+N_NEURONS = 80
 
 # Lengths of simulation area.
 # TODO: units.
@@ -15,11 +15,11 @@ LY = 2000.0
 TIMESTEP = 5.0
 
 # Run time - number of timesteps to run.
-N_RUNS = 5
+N_RUNS = 50
 
 # Dump frequency - dump neuron network to file every this number of steps.
 # 0 - do not dump.
-N_DUMP = 1
+N_DUMP = 10
 
 # Output file name.
 DUMPFILE = 'test.txt'

@@ -1,7 +1,7 @@
 from __future__ import print_function
 from unittest import TestCase
 
-from sweepline import Point, Segment, SweepLine, EventQueue
+from sweepline import TreeNode, Point, Segment, SweepLine, EventQueue
 
 
 class PointTest(TestCase):
@@ -81,3 +81,17 @@ class SegmentTest(TestCase):
         self.seg1 = Segment(self.p1, self.p5, 1)
         self.seg2 = Segment(self.p3, self.p4, 1)
         self.assertFalse(self.seg1.intersects(self.seg2))
+
+
+class SweepLineTest(TestCase):
+    '''Test for sweepline, subclass of left-lean red-black tree.'''
+
+    def setUp(self):
+        self.node = TreeNode(5)
+        self.sl = SweepLine(self.node)
+
+    def test_insert(self):
+        '''Insert a node to sweepline.'''
+        n = TreeNode(4)
+        self.sl.insert_treenode(n)
+        self.assertTrue(len(self.sl.nodes()), 2)

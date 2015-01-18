@@ -55,15 +55,15 @@ def main():
     for step in range(n_runs):
         print("Running now for {s}/{n} step\n".format(s=step, n=n_runs))
         for branch in neurons:
-            print('barnch', neurons.index(branch))
+            # print('barnch', neurons.index(branch))
             children = []
             for neuron in branch:
-                print('neuron', branch.index(neuron))
+                # print('neuron', branch.index(neuron))
                 # Only node that are tips can grow.
                 if not (neuron.left or neuron.right):
                     # children can be one-elemented, two-elemented, or empty
                     # list.
-                    print("Growing", neuron.coor)
+                    # print("Growing", neuron.coor)
                     children += neuron.grow(step + 1)
             branch += children
 
