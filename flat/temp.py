@@ -2,6 +2,7 @@ import llrbt
 reload(llrbt)
 from sweepline import Segment, Point, SweepLine
 from analyzer import have_intersection, analyze
+from animate import draw_result, make_movie
 
 
 p1 = Point((395.4622, 1949.9093))
@@ -36,7 +37,12 @@ n2 = [s4, s5, s6]
 # print "Intersections: {}".format(have_intersection(n1, n2))
 
 with open('test.txt', 'r') as f:
-    print "connections : {}".format(analyze(f))
+    # print "connections : {}".format(analyze(f))
+    draw_result(f)
+'''
+make_movie("dump_%03d.png", "hehe", rate=0.5)
+
+'''
 '''
 DELETING #(632.222,2006.332)->(635.930,2009.682)#,BLACK,False,False, with key #(632.222,2006.332)->(635.930,2009.682)#, f
 rom [#(632.222,2006.332)->(635.930,2009.682)#,BLACK,False,False, #(632.224,2006.327)->(637.058,2007.612)#,BLACK,True,False]
