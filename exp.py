@@ -82,11 +82,12 @@ def main(argv):
 
         # Run for T steps.
         while t<=T:
+            print("Timestep: {0}/{1}".format(t, T))
             # Grow and clean for each neuron.
             for i,item in enumerate(neurons):
-                print("Growing {i}th neuron...".format(i=i))
+                # print("Growing {i}th neuron...".format(i=i))
                 item.grow()
-                print("Cleaning {i}th neuron...".format(i=i))
+                # print("Cleaning {i}th neuron...".format(i=i))
                 item.clean(local=settings.Local)
 
             # Record connected neurons.
@@ -126,9 +127,9 @@ def main(argv):
         with open(out_file_name, 'w') as data_file:
             time_series = sorted(data.keys())
             for t in time_series:
-                data_file.write('\n{tt} '.format(tt=t))
+                data_file.write('{tt} '.format(tt=t))
                 for p in data[t]:
-                    data_file.write('{pp:.3f} '.format(pp=p))
+                    data_file.write('{pp:.3f} \n'.format(pp=p))
 
 
 

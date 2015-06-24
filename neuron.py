@@ -152,7 +152,7 @@ class Neuron():
         elif self.vertex == 4:
             return 4
         elif self.vertex == 6:
-            # Choose randomly from {4, 5, 6}
+            # Choose randomly from range(Hands_low, Hands_high + 1)
             return random.randrange(settings.Hands_low, settings.Hands_high + 1, 1)
         else:
             return ErrorHandsNumber()
@@ -247,15 +247,17 @@ class Neuron():
                 prob.append((neighbour, settings.P1))
             elif abs(np.dot(d1, d1) - settings.MAX_PATH_LENGTH ** 2) < 0.01:
                 # Case 2: go directly.
-                prob.append((neighbour, settings.P1))
+                prob.append((neighbour, settings.P2))
             else:
                 # Case 3: turn left or right 60 degrees.
-                prob.append((neighbour, settings.P1))
+                prob.append((neighbour, settings.P3))
 
         real_way = []
         if n <= len(nodes):
             while len(real_way) < n:
                 # Random number between 0 and sum of a probs.
+                if sum([x[1] for x in prob]) == 0:
+                    break
                 a = random.random() * sum([x[1] for x in prob])
                 c = 0
                 for item in prob:
@@ -281,7 +283,7 @@ class Neuron():
                 changing
                 '''
                 path_copy = copy.deepcopy(path)
-                paths_to_del.append(path_copy)
+                # paths_to_del.append(path_copy)
                 nodes_to_del.append(path_copy.dest)
                 # New length.
                 new_length = path.length - settings.MAX_PATH_LENGTH
@@ -290,6 +292,8 @@ class Neuron():
                 # Append path, node to self.paths, self.nodes
                 self.paths.append(path)
                 self.nodes.append(path.dest)
+
+                paths_to_del.append(path)
 
                 # Check new nodes.
                 if local:
@@ -324,10 +328,7 @@ class Neuron():
 
         # Continue check until all boundary paths have reasonable length.
         if any([x.length > settings.MAX_PATH_LENGTH for x in self.boundary_paths]):
-            if local:
-                self.clean(local=True)
-            else:
-                self.clean()
+            self.clean(local=local)
 
     def check_alive(self):
         '''Check paths in self.boundary_paths, if no possible next_node,
