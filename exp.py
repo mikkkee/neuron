@@ -17,6 +17,7 @@ def main(argv):
     # Parser
     parser = argparse.ArgumentParser()
     parser.add_argument('n', type=int, default=0)
+    parser.add_argument('-d', type=str, default='.')
     parser.add_argument('--no-draw', dest='draw', action='store_false')
     parser.add_argument('-s', '--settings', type=str,
         default=None)
@@ -37,6 +38,9 @@ def main(argv):
     else:
         N = args.n
 
+    # Output directory.
+    directory = args.d
+
     # Draw neuron or not.
     draw_flag = args.draw
 
@@ -46,7 +50,7 @@ def main(argv):
     T = settings.T
 
     # Data file
-    out_file_name = 't_percentage_{n}_speed_25.dat'.format(n=N)
+    out_file_name = '{d}/t_percentage_{n}_speed_25.dat'.format(d=directory, n=N)
 
     nx = settings.Nx
     ny = settings.Ny
@@ -95,7 +99,7 @@ def main(argv):
 
             # Reset image.
             if draw_flag:
-                img_name = "trj_{nn}_{rr}_{tt}.png".format(nn=N, rr=r, tt=t)
+                img_name = "{d}/trj_{nn}_{rr}_{tt}.png".format(d=directory, nn=N, rr=r, tt=t)
                 img = Image.new('RGBA', (settings.Lx, settings.Ly), 'white')
                 draw = ImageDraw.Draw(img)
 
