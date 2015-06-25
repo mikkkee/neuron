@@ -248,17 +248,22 @@ class Tree(object):
         Right - larger;
         Left - Smaller or equal.
         '''
+        if isinstance(node, NIL):
+            return Node.nil
+
         if node is None:
             node = self.root
+
         y = self.root
         if not y:
             return None
-        if y.key == key:
-            return y
-        elif y.key < key:
-            return self.find(key, y.right)
+
+        if node.key == key:
+            return node
+        elif node.key < key:
+            return self.find(key, node.right)
         else:
-            return self.find(key, y.left)
+            return self.find(key, node.left)
 
     def maximum(self, node):
         while node.right:
@@ -403,7 +408,7 @@ class Tree(object):
         self.flip_colors(node)
         # Step 2, if node.left.left is red, rotate to fix 4-node on node.left
         # because fix_up will not fix node.left.
-        if node.left.left.is_red():
+        if node.left.left and node.left.left.is_red():
             node = self.right_rotate(node)
             self.flip_colors(node)
         return node
@@ -448,7 +453,7 @@ class Tree(object):
         if node.key < incision.key:
             # Left.
             # print("left")
-            if (not incision.left.is_red()) and (not incision.left.left.is_red()):
+            if (not incision.left.is_red()) and incision.left.left and (not incision.left.left.is_red()):
                 # Move red left if necessary.
                 incision = self.move_red_left(incision)
             incision.left = self.delete(node, incision=incision.left)
@@ -463,8 +468,10 @@ class Tree(object):
             if node.key == incision.key and not incision.right:
                 # Equal and at bottom -> delete node.
                 incision.right.parent = Node.nil
+                if incision == self.root:
+                    self.root = Node.nil
                 return Node.nil
-            if (not incision.right.is_red()) and (not incision.right.left.is_red()):
+            if (not incision.right.is_red()) and incision.right.left and (not incision.right.left.is_red()):
                 # Move red right if necessary.
                 incision = self.move_red_right(incision)
             if node.key == incision.key:

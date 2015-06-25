@@ -93,8 +93,12 @@ def rotate(direction):
     alpha_max = settings.ALPHA_MAX
     r = random.random()
     alpha = alpha_min + (alpha_max - alpha_min) * r
-    x = direction[0] * math.cos(alpha) - direction[1] * math.sin(alpha)
-    y = direction[0] * math.sin(alpha) + direction[1] * math.cos(alpha)
+    c, d = direction
+    if c == 0 and d == 0:
+        c = random.randint(1, 10)/100.0
+        d = random.randint(1, 10)/100.0
+    x = c * math.cos(alpha) - d * math.sin(alpha)
+    y = c * math.sin(alpha) + d * math.cos(alpha)
     return np.array([x, y])
 
 
@@ -262,7 +266,7 @@ class Node(object):
         node = self
         base_dist = 0
         # Calculate direction from previous segments.
-        print("while 1 in direction started.")
+        # print("while 1 in direction started.")
         while node.parent:
             # Unit vector of the segment represented by current node.
             u = np.array([node.cos, node.sin])
@@ -276,11 +280,12 @@ class Node(object):
             direction += m/(d ** Node.dist_depend) * u
             # Update node to be its parent.
             node = node.parent
-        print("while 1 in direction finished.")
-        print(direction)
+        # print("while 1 in direction finished.")
+        # print(direction)
         # Rotate the direction by a small degree alpha.
         direction_rotated = rotate(direction)
         while not direction_rotated[0]:
+            print(direction_rotated, direction_rotated[0] == 0)
             direction_rotated = rotate(direction)
         return direction_rotated[1]/direction_rotated[0]
 
@@ -358,13 +363,13 @@ class Node(object):
         # Random number for shifting determination.
         rs = random.random()
         if rb <= self.need_branch(step):
-            print("Branching.")
+            # print("Branching.")
             children = self.branch()
         elif rs <= self.need_shift():
-            print('Shifting.')
+            # print('Shifting.')
             children = self.shift()
         else:
-            print('Elongating.')
+            # print('Elongating.')
             self.elongate()
             children = []
 

@@ -49,7 +49,7 @@ class Point(object):
         self._y = coor[1]
 
     def __repr__(self):
-        return "Pt:({:.3f}, {:.3f})".format(self.x, self.y)
+        return "Pt:({:.4f}, {:.4f})".format(self.x, self.y)
 
     def __eq__(self, other):
         '''Equal are guarenteed by float_eq().'''
@@ -155,7 +155,8 @@ class Segment(object):
         self.branch = branch
 
     def __repr__(self):
-        return 'Seg({}, {}, {})'.format(self.left.__repr__(), self.right.__repr__(), self.branch)
+        # return '##'
+        return '#({:.3f},{:.3f})->({:.3f},{:.3f})#'.format(self.left.coor[0], self.left.coor[1], self.right.coor[0], self.right.coor[1])
 
     def intersects(self, seg):
         '''Calculate intersection point bewteen self and another
@@ -181,7 +182,7 @@ class Segment(object):
             btm = float(np.cross(r, s))
             t = np.cross(q - p, s) / btm
             u = np.cross(q - p, r) / btm
-            if 0 <= t <= 1 and 0 <= u <= 1:
+            if 0 < t < 1 and 0 < u < 1:
                 coor = tuple(p + t * r)
                 intersection = Point(coor)
                 return intersection
@@ -193,9 +194,24 @@ class Segment(object):
         the left point of another segment.
         '''
         if isinstance(seg, Segment):
-            point = seg.left
-            y = (self.right.y - self.left.y)/(self.right.x - self.left.x) * (point.x - self.left.x) + self.left.y
-            return y > point.y
+            if seg.left < self.left:
+                point = seg.left
+                y = (self.right.y - self.left.y)/(self.right.x - self.left.x) * (point.x - self.left.x) + self.left.y
+                if y > point.y:
+                    return True
+                elif y == point.y:
+                    return self.right > seg.right
+                else:
+                    return False
+            else:
+                point = self.left
+                y = (seg.right.y - seg.left.y)/(seg.right.x - seg.left.x) * (point.x - seg.left.x) + seg.left.y
+                if point.y > y:
+                    return True
+                elif y == point.y:
+                    return self.right > seg.right
+                else:
+                    return False
         return NotImplemented
 
     def __lt__(self, seg):
@@ -203,9 +219,22 @@ class Segment(object):
         below the left point of another segment.
         '''
         if isinstance(seg, Segment):
-            point = seg.left
-            y = (self.right.y - self.left.y)/(self.right.x - self.left.x) * (point.x - self.left.x) + self.left.y
-            return y < point.y
+            if seg.left < self.left:
+                point = seg.left
+                y = (self.right.y - self.left.y)/(self.right.x - self.left.x) * (point.x - self.left.x) + self.left.y
+                if y < point.y:
+                    return True
+                elif y == point.y:
+                    return self.right < seg.right
+                else:
+                    return False
+            else:
+                point = self.left
+                y = (seg.right.y - seg.left.y)/(seg.right.x - seg.left.x) * (point.x - seg.left.x) + seg.left.y
+                if point.y < y:
+                    return True
+                elif point.y == y:
+                    return self.right < seg.right
         return NotImplemented
 
     def __eq__(self, seg):
@@ -227,17 +256,43 @@ class SweepLine(Tree):
         self.root.above = self.root
         self.root.below = self.root
 
-    def insert(self, node):
+    def predecessor(self, node):
+        '''Return the predecessor of current node.'''
+        if node.left:
+            return self.maximum(node.left)
+        y = node.parent
+        if not y:
+            return node
+        while y and node == y.left:
+            node = y
+            y = y.parent
+        return y
+
+    def successor(self, node):
+        '''Return the successor of current node.'''
+        if node.right:
+            return self.minimum(node.right)
+        y = node.parent
+        if not y:
+            return node
+        while y and node == y.right:
+            node = y
+            y = y.parent
+        return y
+
+    def insert_treenode(self, node, incision=None, parent=None):
         '''Insert a node into SweepLine and change the corresponding
         above-below relation.
         '''
-        super(SweepLine, self).insert(node)
+        super(SweepLine, self).insert(node, incision, parent)
         node.below = self.predecessor(node)
         node.above = self.successor(node)
-        node.below.above = node
-        node.above.below = node
+        if node.below != node:
+            node.below.above = node
+        if node.above != node:
+            node.above.below = node
 
-    def delete(self, node):
+    def delete_treenode(self, node):
         '''Delete a node from SweepLine and change the corresponding
         above-below relation.
         Since Tree.delete() does not return the node be deleted, you have to
