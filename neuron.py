@@ -360,7 +360,7 @@ class Neuron():
         # Draw full paths.
         for path in self.paths:
             line = [path.origin.coor, path.dest.coor]
-            draw.line(line, fill=color, width=1)
+            draw.line(line, fill=color, width=3)
 
         # Draw partial paths.
         for path in self.boundary_paths:
