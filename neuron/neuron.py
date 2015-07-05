@@ -8,6 +8,11 @@ import numpy as np
 
 import settings
 
+
+################################
+############ Classes ###########
+################################
+
 class Node():
 
     def __init__(self, coordinates, connections):
@@ -368,10 +373,13 @@ class Neuron():
             draw.line(line, fill=color, width=3)
 
 
+class Exp(Object):
+    '''A simulation of neuron experiment.'''
+    pass
 
-'''
+################################
 ########## Exceptions ##########
-'''
+################################
 
 
 class ErrorConnectionNumber(Exception):
@@ -383,9 +391,9 @@ class ErrorHandsNumber(Exception):
 
 
 
-'''
-########## Functions. ##########
-'''
+################################
+########## Functions ###########
+################################
 
 
 def coor_equal(c1, c2):
@@ -416,11 +424,9 @@ def check_connections(neurons, connected):
         3. If the sum of common paths' length is larger than MAX_LEN,
            they are connected.
         '''
-        # print("    Generating node pairs...")
+
         node_pairs = product(pair[0].nodes, pair[1].nodes)
-        # print(len(pair[0].nodes), len(pair[1].nodes))
-        # print("    {n} node pairs generated.".format(n=len(node_pairs)))
-        # print("    Comparing nodes....")
+
         for n1, n2 in node_pairs:
             if coor_equal(n1.coor, n2.coor):
                 pair[0].connect()
@@ -428,16 +434,6 @@ def check_connections(neurons, connected):
                 connectFlag = True
                 break
                 print("        Node connected.")
-        # print("    Finished comparing nodes.")
-        '''
-        for node in pair[0].nodes:
-            # check for common nodes in internal nodes.
-            if any([coor_equal(node.coor, x.coor) for x in pair[1].nodes]):
-                pair[0].connect()
-                pair[1].connect()
-                connectFlag = True
-                break
-        '''
 
         # Continue check if previous check didnt turn connected to True.
         if not connectFlag:
