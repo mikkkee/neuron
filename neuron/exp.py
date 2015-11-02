@@ -53,7 +53,7 @@ def main(argv):
     T = settings.T
 
     # Data file
-    out_file_name = '{d}/t_percentage_{n}_speed_25.dat'.format(d=directory, n=N)
+    out_file_name = '{d}/{n}'.format(d=directory, n=settings.OUT_NAME)
 
     nx = settings.Nx
     ny = settings.Ny
@@ -136,7 +136,8 @@ def main(argv):
             for t in time_series:
                 data_file.write('{tt} '.format(tt=t))
                 for p in data[t]:
-                    data_file.write('{pp:.3f} \n'.format(pp=p))
+                    data_file.write('{pp:.3f} '.format(pp=p))
+                data_file.write('\n')
 
 
 
