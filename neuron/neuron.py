@@ -18,7 +18,7 @@ class Node():
     def __init__(self, coordinates, connections):
         '''Init instance.
         coordinates is a (x, y) tuple with x and y of number type.
-        connections is a integer number. It can be 2, 3, 4, or 6.
+        connections is a integer number. It can be 2, 3, 4, 6, or 8.
         max_len is the max_length of path
         '''
         self.coor = tuple([float(x) for x in coordinates])
@@ -46,7 +46,7 @@ class Node():
         Based on number of connections, i.e. type of pattern.
         '''
         neighbours = []
-        length = settings.MAX_PATH_LENGTH
+        length = settings.UNIT_PATH_LENGTH
         x, y = self.coor
 
         if self.connections == 2:
@@ -68,6 +68,16 @@ class Node():
             neighbours.append((x + 0.5*length, y - d*length))
             neighbours.append((x - 0.5*length, y + d*length))
             neighbours.append((x + 0.5*length, y + d*length))
+        elif: self.connections == 8:
+            # Neighbours along x, y, x-y, and x+y.
+            neighbours.append((x + 1*length, y))
+            neighbours.append((x + 1*length, y + 1*length))
+            neighbours.append((x, y + 1*length))
+            neighbours.append((x - 1*length, y + 1*length))
+            neighbours.append((x - 1*length, y))
+            neighbours.append((x - 1*length, y - 1*length))
+            neighbours.append((x, y - 1*length))
+            neighbours.append((x + 1*length, y - 1*length))
         else:
             raise ErrorConnectionNumber()
 
@@ -102,6 +112,7 @@ class Path():
         # Default alive.
         self.alive = True
 
+    @property
     def max_length(self):
         """Return the max length allowed in this path."""
         if self._max_length:
@@ -193,7 +204,7 @@ class Neuron():
                 path.length += self.speed
 
     def split_check(self):
-        '''Check if need split when a path exceeds MAX_PATH_LENGTH.'''
+        '''Check if need split when a path exceeds path.max_length.'''
 
         # Split or not.
         p = random.random()
@@ -247,34 +258,68 @@ class Neuron():
                     return random.sample(possible_nodes, 1)
 
     def local_sample(self, nodes, node, origin, n):
-        '''Choose n elements from nodes according to their local structure with
-        origin and node.'''
+        """Choose n elements from nodes according to their weighted probability
+        which is determined by their local structure with respect to origin and
+        node."""
+
+        # Generate (node, weighted_prob) pairs.
         prob = []
         d1 = np.array(node.coor) - np.array(origin.coor)
-        for neighbour in nodes:
-            d = np.array(neighbour.coor) - np.array(node.coor)
-            if np.dot(d1, d) < 0:
-                # Case 1: go back.
-                prob.append((neighbour, settings.P1))
-            elif abs(np.dot(d1, d1) - settings.MAX_PATH_LENGTH ** 2) < 0.01:
-                # Case 2: go directly.
-                prob.append((neighbour, settings.P2))
-            else:
-                # Case 3: turn left or right 60 degrees.
-                prob.append((neighbour, settings.P3))
+        if node.connections == 2:
+            return random.sample(nodes, n)
+        elif node.connections == 4:
+            for neighbour in nodes:
+                d = np.array(neighbour.coor) - np.array(node.coor)
+                if abs(np.dot(d1, d)) < 0.01:
+                    # Case 1 in 4 connected canvas: go left or right.
+                    prob.append((nieghbour, settings.P4_1))
+                else:
+                    # Case 2 in 4 connected canvas: go directly.
+                    prob.append((nightbour, settings.P4_2))
+        elif node.connections == 6:
+            for neighbour in nodes:
+                d = np.array(neighbour.coor) - np.array(node.coor)
+                if np.dot(d1, d) < 0:
+                    # Case 1 in 6 connected canvas: go back.
+                    prob.append((neighbour, settings.P6_1))
+                elif abs(np.dot(d1, d) - settings.UNIT_PATH_LENGTH ** 2 / 2.0) < 0.01:
+                    # Case 2 in 6 connected canvas: turn left/right 60 degrees.
+                    prob.append((neighbour, settings.P6_2))
+                else:
+                    # Case 3 in 6 connected canvas: go directly.
+                    prob.append((neighbour, settings.P6_3))
+        elif node.connections == 8:
+            for neighbour in nodes:
+                d = np.array(neighbour.coor) - np.array(node.coor)
+                if np.dot(d1, d) < 0:
+                    # Case 1 in 8 connected canvas: go back.
+                    prob.append((neighbour, settings.P8_1))
+                elif abs(np.dot(d1, d)) < 0.01:
+                    # Case 2 in 8 connected canvas: turn left/right 90 degrees.
+                    prob.append((neighbour, settings.P8_2))
+                elif abs(np.dot(d1, d2) - settings.UNIT_PATH_LENGTH ** 2 * math.sqrt(2)) < 0.01:
+                    # Case 3 in 8 connected canvas: turn left/right 45 degrees.
+                    prob.append((neighbour, settings.P8_3))
+                else:
+                    # Case 4 in 8 connected canvas: go directly.
+                    prob.append((neighbour, settings.P8_4))
 
+        # Sample from possible nodes.
         real_way = []
         if n <= len(nodes):
             while len(real_way) < n:
-                # Random number between 0 and sum of a probs.
+                # Random number between 0 and sum of all probs.
                 if sum([x[1] for x in prob]) == 0:
                     break
                 a = random.random() * sum([x[1] for x in prob])
                 c = 0
                 for item in prob:
+                    # Check which node is selected by random variable a.
+                    # Each node can be selected only for once.
                     c = c + item[1]
                     if a < c:
                         real_way.append(item[0])
+                        del item
                         break
         return real_way
 
@@ -288,7 +333,7 @@ class Neuron():
 
         # Check for each path in boundary_paths.
         for path in self.boundary_paths:
-            if path.length > settings.MAX_PATH_LENGTH:
+            if path.length > path.max_length:
                 '''
                 Append to to_del list. Use deep copy in case of path
                 changing
@@ -297,9 +342,9 @@ class Neuron():
                 # paths_to_del.append(path_copy)
                 nodes_to_del.append(path_copy.dest)
                 # New length.
-                new_length = path.length - settings.MAX_PATH_LENGTH
+                new_length = path.length - path.max_length
                 # Convert path.length to max_length to prepare for be appended.
-                path.length = settings.MAX_PATH_LENGTH
+                path.length = path.max_length
                 # Append path, node to self.paths, self.nodes
                 self.paths.append(path)
                 self.nodes.append(path.dest)
@@ -338,7 +383,7 @@ class Neuron():
                 del self.boundary_paths[self.boundary_paths.index(path)]
 
         # Continue check until all boundary paths have reasonable length.
-        if any([x.length > settings.MAX_PATH_LENGTH for x in self.boundary_paths]):
+        if any([x.length > x.max_length for x in self.boundary_paths]):
             self.clean(local=local)
 
     def check_alive(self):
@@ -354,7 +399,7 @@ class Neuron():
         p1 = path.origin.coor
         p2 = path.dest.coor
         l = float(path.length)
-        m = settings.MAX_PATH_LENGTH
+        m = path.max_length
         # Calculate x and y
         x = l/m * p2[0] + (m - l)/m * p1[0]
         y = l/m * p2[1] + (m - l)/m * p1[1]
@@ -452,7 +497,7 @@ def check_connections(neurons, connected):
                 if (
                     coor_equal(p1.dest.coor, p2.origin.coor) and \
                     coor_equal(p2.dest.coor, p1.origin.coor) and \
-                    p1.length + p2.length >= settings.MAX_PATH_LENGTH
+                    p1.length + p2.length >= p1.max_length
                     ):
                         pair[0].connect()
                         pair[1].connect()
@@ -477,7 +522,7 @@ def pattern42(N, nx, ny, p=0.3):
     p - number of neurons to all grids.'''
 
     grid = []
-    lattice = settings.MAX_PATH_LENGTH
+    lattice = settings.UNIT_PATH_LENGTH
 
     n_neurons = int(nx*ny*p)
 
@@ -499,7 +544,7 @@ def pattern6(nx, ny, p=0.3):
     ny2 = ny - ny1
 
     grid = []
-    lattice = settings.MAX_PATH_LENGTH
+    lattice = settings.UNIT_PATH_LENGTH
     h = math.sqrt(3)
 
     n_neurons = int(nx*ny*p)
