@@ -81,9 +81,6 @@ class Node():
 
 class Path():
 
-    # Maximum length settings.
-    max_length = settings.MAX_PATH_LENGTH
-
     def __repr__(self):
         return "({n1[0]}, {n1[1]}) -> ({n2[0]}, {n2[1]}), {length}".format(
             n1=self.origin.coor, n2=self.dest.coor, length=self.length)
@@ -104,6 +101,15 @@ class Path():
         self.length = length
         # Default alive.
         self.alive = True
+
+    def max_length(self):
+        """Return the max length allowed in this path."""
+        if self._max_length:
+            return self._max_length
+        else:
+            path = np.array(self.origin.coor) - np.array(self.dest.coor)
+            self._max_length = np.linalg.norm(path)
+            return self._max_length
 
     def died(self):
         # Turn a path to dead.

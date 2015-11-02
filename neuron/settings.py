@@ -37,8 +37,10 @@ P3 = 0.99
 
 ######## Pattern settings ########
 
-# Maximum length of a path.
-MAX_PATH_LENGTH = 5
+# Unit length of a path.
+# For paths on 2,3,4,6 connected canvas, this is the edge length.
+# For paths on 8 connected canvas this is the length of the smallest square.
+UNIT_PATH_LENGTH = 5
 
 # Pattern grid settings.
 Nx = 180
