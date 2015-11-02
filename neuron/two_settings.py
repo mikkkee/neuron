@@ -30,15 +30,22 @@ SPLIT_PROBABILITY = 0.1
 # Probabilities of different directions.
 # What matters here is the ratio between each probabilities, because not
 # all ways are available when choosing.
-P1 = 0
-P2 = 0.01
-P3 = 0.99
+P4_1 = 0.2
+P4_2 = 0.8
 
+P6_1 = 0
+P6_2 = 0.01
+P6_3 = 0.99
+
+P8_1 = 0
+P8_2 = 0.01
+P8_3 = 0
+P8_4 = 0.01
 
 ######## Pattern settings ########
 
 # Maximum length of a path.
-MAX_PATH_LENGTH = 50
+UNIT_PATH_LENGTH = 50
 
 # Pattern grid settings.
 Nx = 18

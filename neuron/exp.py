@@ -16,8 +16,11 @@ def main(argv):
 
     # Parser
     parser = argparse.ArgumentParser()
+    # Number of connections.
     parser.add_argument('n', type=int, default=0)
+    # Working directory.
     parser.add_argument('-d', type=str, default='.')
+    # Draw neuron or not.
     parser.add_argument('--no-draw', dest='draw', action='store_false')
     parser.add_argument('-s', '--settings', type=str,
         default=None)

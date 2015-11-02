@@ -68,7 +68,7 @@ class Node():
             neighbours.append((x + 0.5*length, y - d*length))
             neighbours.append((x - 0.5*length, y + d*length))
             neighbours.append((x + 0.5*length, y + d*length))
-        elif: self.connections == 8:
+        elif self.connections == 8:
             # Neighbours along x, y, x-y, and x+y.
             neighbours.append((x + 1*length, y))
             neighbours.append((x + 1*length, y + 1*length))
@@ -109,6 +109,7 @@ class Path():
         self.origin = origin
         self.dest = dest
         self.length = length
+        self._max_length = False
         # Default alive.
         self.alive = True
 
@@ -165,7 +166,7 @@ class Neuron():
     @property
     def hands(self):
         '''Return number of initial hands for neuron.
-        Randomly chose from (4,5,6) if self.vertex ==6 to ensure that
+        Randomly chose from (4,5,6) if self.vertex == 6 to ensure that
         not all neurons have the same number of hands.'''
         if self.vertex == 2:
             return 2
@@ -173,11 +174,11 @@ class Neuron():
             return 3
         elif self.vertex == 4:
             return 4
-        elif self.vertex == 6:
+        elif self.vertex == 6 or self.vertex == 8:
             # Choose randomly from range(Hands_low, Hands_high + 1)
             return random.randrange(settings.Hands_low, settings.Hands_high + 1, 1)
         else:
-            return ErrorHandsNumber()
+            raise ErrorHandsNumber()
 
     def born(self):
         '''Grow hands to init self.nodes, self.boundary_nodes,
@@ -297,7 +298,7 @@ class Neuron():
                 elif abs(np.dot(d1, d)) < 0.01:
                     # Case 2 in 8 connected canvas: turn left/right 90 degrees.
                     prob.append((neighbour, settings.P8_2))
-                elif abs(np.dot(d1, d2) - settings.UNIT_PATH_LENGTH ** 2 * math.sqrt(2)) < 0.01:
+                elif abs(np.dot(d1, d) - settings.UNIT_PATH_LENGTH ** 2 * math.sqrt(2)) < 0.01:
                     # Case 3 in 8 connected canvas: turn left/right 45 degrees.
                     prob.append((neighbour, settings.P8_3))
                 else:
@@ -424,7 +425,7 @@ class Neuron():
             draw.line(line, fill=color, width=3)
 
 
-class Exp(Object):
+class Exp(object):
     '''A simulation of neuron experiment.'''
     pass
 

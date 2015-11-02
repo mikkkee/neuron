@@ -19,7 +19,7 @@ Local = True
 
 # Number of hands for type 6.
 Hands_low = 1
-Hands_high = 5
+Hands_high = 6
 
 # Grow speed of neuron branches.
 GROW_SPEED = 5.7
@@ -46,7 +46,7 @@ P8_4 = 0.01
 ######## Pattern settings ########
 
 # Maximum length of a path.
-MAX_PATH_LENGTH = 50
+UNIT_PATH_LENGTH = 50
 
 # Pattern grid settings.
 Nx = 18
