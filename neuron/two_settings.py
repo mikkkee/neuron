@@ -1,5 +1,8 @@
 '''Settings for neuron.py'''
 
+######## Output file settings ########
+OUT_NAME = '2_connectivity_result.dat'
+
 ######## Experimental settings ########
 
 # Number of different runs.

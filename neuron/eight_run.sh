@@ -14,7 +14,7 @@ echo -n '' > $OUT
 
 for j in $(seq 1 $NRUN);
 do
-    python exp.py $i -d $d
+    python exp.py $i -d $d --no-draw
     cat $DATA >> $OUT
     echo '' >> $OUT
 done

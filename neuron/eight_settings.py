@@ -1,12 +1,15 @@
 '''Settings for neuron.py'''
 
+######## Output file settings ########
+OUT_NAME = '8_connectivity_result.dat'
+
 ######## Experimental settings ########
 
 # Number of different runs.
-N_run = 1
+N_run = 20
 
 # Number of timesteps to run.
-T = 24
+T = 100
 
 # Neuron percentage. Ratio of neuron number to the number of total grid points.
 pn = 0.3
@@ -22,7 +25,7 @@ Hands_low = 1
 Hands_high = 8
 
 # Grow speed of neuron branches.
-GROW_SPEED = 5.7
+GROW_SPEED = 1.6
 
 # Split probability of a branch when encounters a new node.
 SPLIT_PROBABILITY = 0.1
