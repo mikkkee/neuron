@@ -3,19 +3,22 @@
 # Classes
 
 ## `Node`
-- `coor`: for coordinates
-- `connections:` number of neighbours.
-- `neighbours`: neighbour nodes of current node. Different calculation methods
-  for different number of connections.
+- `coor`: (x, y) coordinates.
+- `connections:` number of neighbours, can be 2, 3, 4, 6, or 8.
+- `neighbours`: return the neighbour nodes of current node. Number of neighbours
+  is determined by `self.connections`.
 - `__hash__()`: operator overloading, used for comparison and in `set`.
 - `__eq__()`: operator overloading, used for comparison.
 - `__repr__()`: operator overloading, representation.
 
 ## `Path`
-- `origin`: one of the nodes it is connecting. Origin node.
-- `dest`: the other node it is connecting. Destination node.
+- `origin`: one of the nodes the path is connecting. Origin node.
+- `dest`: the other node the path is connecting. Destination node. Grow
+  direction of path is `self.origin` -> `self.dest`.
 - `length`: length of path.
-- `alive`: If `True`, the path can grow at next step, else cannot grow.
+- `alive`: if `True`, the path can grow at next step, otherwise it cannot grow.
+- `max_length`: the max allowed length of current path. The path will be divided
+  into 2 or more paths in `Neuron.clean()` if `self.length` > `self.max_length`.
 - `died()`: Turn a path to dead state by setting `self.alive` to False.
 - `grow()`: increase `self.length`.
 - `__hash__()`: operator overloading, used for comparison and in `set`.
@@ -24,16 +27,16 @@
 
 ## `Neuron`
 
+A neuron is a collection of `Node`s and `Path`s. It grows as time passes.
+
 Basic properties
 
 - `origin`: the neuron's starting node.
-- `speed`: the neuron's growing speed.
-- `vertex`: how many neighbour nodes one node has in the pattern.
-- `hand`: how many hands one neuron has at the beginning. {2:2, 3:3, 4:4, 6:(4,5,6)}
-- `split_prob`: probability for one neutron's hand to split into 2 hands on a
-  node.
-  Assuming that each hand will split only when it encounters a new node.
-- `max_path_len`: maximum length for each path.
+- `speed`: the grow speed for each path.
+- `vertex`: number of neighbours for each node.
+- `hand`: number of neurites one neuron has at the beginning of a simulation.
+- `split_prob`: probability for one neurite to split into 2 neurites on a
+  node. A neurite will split only when it encounters a new node.
 
 Conformation properties
 
@@ -49,8 +52,8 @@ Methods
   `boundary_nodes`.
 - `grow()`: increase the length of one neuron's alive `boundary_paths` by amount
   of `speed`.
-- `clean()`: check if any path in `boundary_paths` has exceeded the maximum
-  length. If one path exceeds the maximum length:
+- `clean()`: check if any path in `boundary_paths` has exceeded its maximum
+  length. If one path exceeds its maximum length:
   1. include the destination node to current neuron's `nodes`.
   2. Decide whether to split or not by using `split_check()`.
   3. Decide which way to grow by using `way_to_go()`.
@@ -65,6 +68,11 @@ Methods
   choose from possible destination nodes `split_check()` passes.
 - `cal_end(self, path)`: calculate coordinates of a endpoint for a path.
 - `draw()`: Draw origin node and current paths on a `Draw` object.
+
+
+## `Exp`
+
+Simulation class placeholder.
 
 # Functions
 
