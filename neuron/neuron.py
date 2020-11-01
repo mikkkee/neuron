@@ -135,7 +135,7 @@ class Path():
         self.length += distance
 
 
-class Neuron():
+class Neuron(object):
     """A neuron is a collection of Nodes and Paths.
     It grows as time passes.
     """
@@ -280,10 +280,10 @@ class Neuron():
                 d = np.array(neighbour.coor) - np.array(node.coor)
                 if abs(np.dot(d1, d)) < 0.01:
                     # Case 1 in 4 connected canvas: go left or right.
-                    prob.append((nieghbour, settings.P4_1))
+                    prob.append((neighbour, settings.P4_1))
                 else:
                     # Case 2 in 4 connected canvas: go directly.
-                    prob.append((nightbour, settings.P4_2))
+                    prob.append((neighbour, settings.P4_2))
         elif node.connections == 6:
             for neighbour in nodes:
                 d = np.array(neighbour.coor) - np.array(node.coor)
